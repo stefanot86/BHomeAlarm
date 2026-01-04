@@ -11,6 +11,9 @@
     <!-- Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Contacts (for phone number picker) -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <!-- Other -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -35,7 +38,7 @@
             </intent-filter>
         </activity>
 
-        <!-- SMS Receiver -->
+        <!-- SMS Receiver for incoming SMS -->
         <receiver
             android:name=".service.SmsReceiver"
             android:enabled="true"
@@ -43,6 +46,16 @@
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="100">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- SMS Status Receiver for sent/delivered status -->
+        <receiver
+            android:name=".service.SmsSentReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="it.bhomealarm.SMS_SENT" />
+                <action android:name="it.bhomealarm.SMS_DELIVERED" />
             </intent-filter>
         </receiver>
 

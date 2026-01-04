@@ -64,4 +64,26 @@ Consulta la cartella `docs/` per la documentazione completa:
 
 ## Stato del Progetto
 
-In sviluppo - Fase di pianificazione e documentazione completata.
+**Issue #1 - Scheletro progetto: COMPLETATO**
+
+### Completato
+- [x] Model Layer (entities, DAOs, database, repository)
+- [x] Utility Layer (Constants, SmsParser, PhoneNumberUtils, PermissionHelper)
+- [x] Callback Interfaces
+- [x] ViewModels (MVVM pattern)
+- [x] Service Layer (SmsService, SmsReceiver, NotificationService)
+- [x] Layout XML per tutti i Fragment
+- [x] Risorse (strings, colors, themes Material Design 3)
+- [x] Navigation Graph con animazioni
+- [x] Icone vector drawable
+
+### Da Implementare
+- [ ] Adapter RecyclerView (Users, Scenarios, Zones, ConfigSteps, SmsLog)
+- [ ] Completare Fragment (collegare UI ai ViewModel)
+- [ ] Fragment mancanti (Splash, Disclaimer, SetupPhone)
+- [ ] Dialogs (SimSelection, Confirmation, PhoneInput)
+- [ ] Collegamento SMS reale nei ViewModel
+- [ ] Registrazione receiver in AndroidManifest
+- [ ] Testing
+
+Vedi [docs/TODO.md](docs/TODO.md) per la lista dettagliata.
