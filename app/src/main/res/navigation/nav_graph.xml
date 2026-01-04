@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <!-- Home Fragment -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="it.bhomealarm.view.fragment.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_home_to_settings"
+            app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_home_to_scenarios"
+            app:destination="@id/scenariosFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_home_to_configuration"
+            app:destination="@id/configurationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="it.bhomealarm.view.fragment.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settings_to_configuration"
+            app:destination="@id/configurationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_settings_to_users"
+            app:destination="@id/usersFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_settings_to_scenarios"
+            app:destination="@id/scenariosFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_settings_to_log"
+            app:destination="@id/logFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+    <!-- Configuration Fragment -->
+    <fragment
+        android:id="@+id/configurationFragment"
+        android:name="it.bhomealarm.view.fragment.ConfigurationFragment"
+        android:label="@string/title_configuration"
+        tools:layout="@layout/fragment_configuration" />
+
+    <!-- Users Fragment -->
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="it.bhomealarm.view.fragment.UsersFragment"
+        android:label="@string/title_users"
+        tools:layout="@layout/fragment_users" />
+
+    <!-- Scenarios Fragment -->
+    <fragment
+        android:id="@+id/scenariosFragment"
+        android:name="it.bhomealarm.view.fragment.ScenariosFragment"
+        android:label="@string/title_scenarios"
+        tools:layout="@layout/fragment_scenarios">
+
+        <action
+            android:id="@+id/action_scenarios_to_zones"
+            app:destination="@id/zonesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+    <!-- Zones Fragment -->
+    <fragment
+        android:id="@+id/zonesFragment"
+        android:name="it.bhomealarm.view.fragment.ZonesFragment"
+        android:label="@string/title_zones"
+        tools:layout="@layout/fragment_zones" />
+
+    <!-- Log Fragment -->
+    <fragment
+        android:id="@+id/logFragment"
+        android:name="it.bhomealarm.view.fragment.LogFragment"
+        android:label="@string/title_log"
+        tools:layout="@layout/fragment_log" />
+
+</navigation>

@@ -204,4 +204,83 @@ public class AlarmRepository {
             appSettingsDao.markFirstLaunchComplete(System.currentTimeMillis())
         );
     }
+
+    // ========== ViewModel Helper Methods ==========
+
+    /**
+     * Salva una lista di zone (cancella le esistenti e inserisce le nuove).
+     */
+    public void saveZones(List<Zone> zones) {
+        executorService.execute(() -> {
+            zoneDao.deleteAll();
+            if (zones != null && !zones.isEmpty()) {
+                zoneDao.insertAll(zones);
+            }
+        });
+    }
+
+    /**
+     * Salva una lista di scenari (inserisce o aggiorna).
+     */
+    public void saveScenarios(List<Scenario> scenarios) {
+        executorService.execute(() -> {
+            if (scenarios != null) {
+                for (Scenario s : scenarios) {
+                    scenarioDao.insert(s);
+                }
+            }
+        });
+    }
+
+    /**
+     * Salva una lista di utenti (inserisce o aggiorna).
+     */
+    public void saveUsers(List<User> users) {
+        executorService.execute(() -> {
+            if (users != null) {
+                for (User u : users) {
+                    userDao.insert(u);
+                }
+            }
+        });
+    }
+
+    /**
+     * Aggiorna la versione firmware nella configurazione.
+     */
+    public void updateConfigVersion(String version) {
+        executorService.execute(() -> {
+            // Se non esiste, crea una nuova configurazione
+            AlarmConfig config = new AlarmConfig();
+            config.setId(1);
+            config.setVersion(version);
+            alarmConfigDao.insert(config);
+        });
+    }
+
+    /**
+     * Cancella tutti i dati dal database.
+     */
+    public void clearAllData() {
+        executorService.execute(() -> {
+            zoneDao.deleteAll();
+            scenarioDao.deleteAll();
+            userDao.deleteAll();
+            smsLogDao.deleteAll();
+        });
+    }
+
+    /**
+     * Ottiene i log recenti con limite.
+     */
+    public LiveData<List<SmsLog>> getRecentLogs(int limit) {
+        return smsLogDao.getRecentLogs(limit);
+    }
+
+    /**
+     * Cancella tutti i log SMS.
+     */
+    public void clearAllLogs() {
+        executorService.execute(smsLogDao::deleteAll);
+    }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="12dp">
+
+    <ImageView
+        android:id="@+id/icon_status"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_pending"
+        app:tint="?attr/colorOnSurfaceVariant"
+        tools:src="@drawable/ic_check_circle" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_step_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            tools:text="CONF1 - Configurazione base" />
+
+        <TextView
+            android:id="@+id/text_step_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:visibility="gone"
+            tools:text="In attesa..."
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_step"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorSize="20dp"
+        app:trackThickness="2dp"
+        tools:visibility="visible" />
+
+</LinearLayout>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">BHomeAlarm</string>
+
+    <!-- Titles -->
+    <string name="title_home">Home</string>
+    <string name="title_settings">Impostazioni</string>
+    <string name="title_configuration">Configurazione</string>
+    <string name="title_users">Utenti</string>
+    <string name="title_scenarios">Scenari</string>
+    <string name="title_zones">Seleziona Zone</string>
+    <string name="title_log">Cronologia SMS</string>
+
+    <!-- Status -->
+    <string name="status_label">Sistema</string>
+    <string name="status_armed">ATTIVO</string>
+    <string name="status_disarmed">DISATTIVO</string>
+    <string name="status_alarm">ALLARME</string>
+    <string name="status_tamper">MANOMISSIONE</string>
+    <string name="status_unknown">Sconosciuto</string>
+    <string name="status_icon">Icona stato</string>
+
+    <!-- Actions -->
+    <string name="action_arm">Attiva Allarme</string>
+    <string name="action_arm_desc">Seleziona scenario</string>
+    <string name="arm_icon">Icona attiva</string>
+    <string name="action_disarm">Disattiva</string>
+    <string name="action_disarm_desc">Spegni sistema</string>
+    <string name="disarm_icon">Icona disattiva</string>
+    <string name="action_status">Verifica Stato</string>
+    <string name="action_status_desc">Controlla sistema</string>
+    <string name="action_settings">Impostazioni</string>
+    <string name="action_cancel">Annulla</string>
+    <string name="action_start">Avvia</string>
+    <string name="action_save">Salva</string>
+    <string name="action_continue">Continua</string>
+    <string name="action_clear_log">Cancella cronologia</string>
+
+    <!-- Settings Sections -->
+    <string name="section_configuration">Configurazione</string>
+    <string name="section_management">Gestione</string>
+    <string name="section_sim">SIM</string>
+    <string name="section_info">Informazioni</string>
+
+    <!-- Settings Items -->
+    <string name="setting_phone_number">Numero allarme</string>
+    <string name="setting_configure">Configura sistema</string>
+    <string name="setting_configure_desc">Scarica CONF1-5</string>
+    <string name="setting_users">Utenti</string>
+    <string name="setting_users_desc">Gestisci rubrica</string>
+    <string name="setting_scenarios">Scenari</string>
+    <string name="setting_sim">SIM per invio</string>
+    <string name="setting_info">Informazioni</string>
+    <string name="not_configured">Non configurato</string>
+    <string name="scenarios_count_default">16 scenari</string>
+    <string name="sim_default">SIM predefinita</string>
+    <string name="version_default">Versione 1.0.0</string>
+
+    <!-- Configuration -->
+    <string name="config_waiting">In attesa di avvio…</string>
+    <string name="config_steps">Dettaglio operazioni</string>
+    <string name="config_debug">Debug</string>
+    <string name="config_sending">Invio richiesta…</string>
+    <string name="config_receiving">Ricezione risposta…</string>
+    <string name="config_complete">Configurazione completata!</string>
+    <string name="config_error">Errore durante la configurazione</string>
+
+    <!-- Users -->
+    <string name="users_empty">Nessun utente</string>
+    <string name="users_empty_desc">Esegui la configurazione per scaricare la rubrica utenti</string>
+    <string name="user_slot">Utente %d</string>
+    <string name="user_joker">Joker</string>
+
+    <!-- Scenarios -->
+    <string name="scenarios_predefined">Scenari Predefiniti</string>
+    <string name="scenarios_custom">Personalizzato</string>
+    <string name="scenario_custom_title">Crea scenario</string>
+    <string name="scenario_custom_desc">Seleziona zone manualmente</string>
+    <string name="scenario_zones">Zone: %s</string>
+
+    <!-- Zones -->
+    <string name="zones_instruction">Seleziona le zone da includere nello scenario personalizzato</string>
+    <string name="zone_name">Zona %d - %s</string>
+    <string name="zones_selected">%d zone selezionate</string>
+    <string name="zones_none_selected">Nessuna zona selezionata</string>
+
+    <!-- Log -->
+    <string name="log_empty">Nessun messaggio</string>
+    <string name="log_direction_tx">Inviato</string>
+    <string name="log_direction_rx">Ricevuto</string>
+    <string name="log_status_sent">Inviato</string>
+    <string name="log_status_delivered">Consegnato</string>
+    <string name="log_status_error">Errore</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_confirm_disarm_title">Conferma</string>
+    <string name="dialog_confirm_disarm_message">Vuoi disattivare l\'allarme?</string>
+    <string name="dialog_sim_title">Seleziona SIM</string>
+    <string name="dialog_sim_remember">Ricorda scelta</string>
+    <string name="dialog_send">Invia</string>
+
+    <!-- Permissions -->
+    <string name="permission_sms_title">Permessi SMS</string>
+    <string name="permission_sms_message">L\'app necessita dei permessi SMS per comunicare con il sistema allarme</string>
+    <string name="permission_grant">Concedi</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Si è verificato un errore</string>
+    <string name="error_sms_send">Errore invio SMS</string>
+    <string name="error_sms_timeout">Timeout: nessuna risposta ricevuta</string>
+    <string name="error_no_phone">Numero allarme non configurato</string>
+    <string name="error_no_permission">Permessi non concessi</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_alarm">Allarme</string>
+    <string name="notification_channel_sms">Stato SMS</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_navigate_back">Torna indietro</string>
+    <string name="cd_status_armed">Sistema attivo</string>
+    <string name="cd_status_disarmed">Sistema disattivo</string>
+</resources>
