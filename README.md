@@ -20,13 +20,13 @@ App Android per la gestione della centrale antifurto Bticino 3500/3500N tramite 
 
 ## Architettura
 
-Il progetto segue il pattern **MVC (Model-View-Controller)**:
+Il progetto segue il pattern **MVVM (Model-View-ViewModel)**:
 
 ```
 it.bhomealarm/
 ├── model/          # Entities Room, DAOs, Repository
 ├── view/           # Activities, Fragments, Adapters
-├── controller/     # Business logic controllers
+├── controller/     # ViewModels
 ├── service/        # SMS e Notification services
 ├── util/           # Utilities e helpers
 └── callback/       # Interfaces
@@ -45,7 +45,7 @@ it.bhomealarm/
 
 Consulta la cartella `docs/` per la documentazione completa:
 
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architettura MVC dettagliata
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architettura dettagliata
 - [FEATURES.md](docs/FEATURES.md) - Lista funzionalita
 - [SCREENS.md](docs/SCREENS.md) - Design UI/UX
 - [DATA_MODEL.md](docs/DATA_MODEL.md) - Modello dati Room
@@ -64,26 +64,20 @@ Consulta la cartella `docs/` per la documentazione completa:
 
 ## Stato del Progetto
 
-**Issue #1 - Scheletro progetto: COMPLETATO**
+**Implementazione completata**
 
-### Completato
-- [x] Model Layer (entities, DAOs, database, repository)
-- [x] Utility Layer (Constants, SmsParser, PhoneNumberUtils, PermissionHelper)
-- [x] Callback Interfaces
-- [x] ViewModels (MVVM pattern)
-- [x] Service Layer (SmsService, SmsReceiver, NotificationService)
-- [x] Layout XML per tutti i Fragment
-- [x] Risorse (strings, colors, themes Material Design 3)
-- [x] Navigation Graph con animazioni
-- [x] Icone vector drawable
-
-### Da Implementare
-- [ ] Adapter RecyclerView (Users, Scenarios, Zones, ConfigSteps, SmsLog)
-- [ ] Completare Fragment (collegare UI ai ViewModel)
-- [ ] Fragment mancanti (Splash, Disclaimer, SetupPhone)
-- [ ] Dialogs (SimSelection, Confirmation, PhoneInput)
-- [ ] Collegamento SMS reale nei ViewModel
-- [ ] Registrazione receiver in AndroidManifest
-- [ ] Testing
-
-Vedi [docs/TODO.md](docs/TODO.md) per la lista dettagliata.
+### Funzionalita Implementate
+- Model Layer (entities, DAOs, database, repository)
+- Utility Layer (Constants, SmsParser, PhoneNumberUtils, PermissionHelper)
+- Callback Interfaces
+- ViewModels con pattern MVVM
+- Service Layer (SmsService, SmsReceiver, NotificationService, SmsSentReceiver)
+- Tutti i Fragment UI (Home, Settings, Configuration, Users, Scenarios, Zones, Log)
+- Fragment di setup (Splash, Disclaimer, SetupPhone)
+- Adapter RecyclerView (Users, Scenarios, Zones, ConfigSteps, SmsLog)
+- Layout XML per tutti i Fragment
+- Risorse (strings, colors, themes Material Design 3)
+- Navigation Graph con animazioni e flusso setup iniziale
+- Icone vector drawable
+- Collegamento SMS completo nei ViewModel
+- State machine configurazione CONF1-5
