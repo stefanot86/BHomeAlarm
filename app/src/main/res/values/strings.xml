@@ -156,6 +156,7 @@
     <string name="error_sms_timeout">Timeout: nessuna risposta ricevuta</string>
     <string name="error_no_phone">Numero allarme non configurato</string>
     <string name="error_no_permission">Permessi non concessi</string>
+    <string name="permissions_required">Alcuni permessi sono necessari per il funzionamento dell\'app</string>
 
     <!-- Notifications -->
     <string name="notification_channel_alarm">Allarme</string>

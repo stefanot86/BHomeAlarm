@@ -79,10 +79,6 @@ public class HomeFragment extends Fragment {
                 Navigation.findNavController(requireView())
                         .navigate(R.id.action_home_to_settings);
                 return true;
-            } else if (item.getItemId() == R.id.action_log) {
-                Navigation.findNavController(requireView())
-                        .navigate(R.id.action_home_to_settings);
-                return true;
             }
             return false;
         });
