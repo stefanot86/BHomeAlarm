@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="zones_selected_count">
+        <item quantity="zero">Nessuna zona selezionata</item>
+        <item quantity="one">%d zona selezionata</item>
+        <item quantity="other">%d zone selezionate</item>
+    </plurals>
+</resources>

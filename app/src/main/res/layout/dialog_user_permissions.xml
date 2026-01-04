@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/permissions_description"
+        android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_rx1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_rx1" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_rx2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_rx2" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_verify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_verify" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_cmd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_cmd" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="16dp"
+        android:background="?attr/dividerColor" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_apply_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/apply_to_all_users" />
+
+</LinearLayout>

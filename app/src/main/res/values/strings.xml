@@ -36,6 +36,13 @@
     <string name="action_save">Salva</string>
     <string name="action_continue">Continua</string>
     <string name="action_clear_log">Cancella cronologia</string>
+    <string name="action_dismiss">Chiudi</string>
+    <string name="action_ok">OK</string>
+    <string name="action_yes">Si</string>
+    <string name="action_no">No</string>
+    <string name="action_close">Chiudi</string>
+    <string name="action_retry">Riprova</string>
+    <string name="action_clear">Cancella</string>
 
     <!-- Settings Sections -->
     <string name="section_configuration">Configurazione</string>
@@ -56,6 +63,13 @@
     <string name="scenarios_count_default">16 scenari</string>
     <string name="sim_default">SIM predefinita</string>
     <string name="version_default">Versione 1.0.0</string>
+    <string name="version_format">Versione %s</string>
+    <string name="sim_slot_format">SIM %d</string>
+    <string name="sim_slot_1">SIM 1</string>
+    <string name="sim_slot_2">SIM 2</string>
+    <string name="hint_phone_number">Es. +39123456789</string>
+    <string name="info_message">BHomeAlarm v%s\n\nApplicazione per il controllo di sistemi di allarme BentelAlarm via SMS.\n\nSviluppato per uso personale.</string>
+    <string name="last_check_format">Ultimo controllo: %s</string>
 
     <!-- Configuration -->
     <string name="config_waiting">In attesa di avvio…</string>
@@ -65,6 +79,8 @@
     <string name="config_receiving">Ricezione risposta…</string>
     <string name="config_complete">Configurazione completata!</string>
     <string name="config_error">Errore durante la configurazione</string>
+    <string name="config_running">In corso…</string>
+    <string name="percent_format">%d%%</string>
 
     <!-- Users -->
     <string name="users_empty">Nessun utente</string>
@@ -89,9 +105,16 @@
     <string name="log_empty">Nessun messaggio</string>
     <string name="log_direction_tx">Inviato</string>
     <string name="log_direction_rx">Ricevuto</string>
+    <string name="log_direction_outgoing">Inviato</string>
+    <string name="log_direction_incoming">Ricevuto</string>
     <string name="log_status_sent">Inviato</string>
     <string name="log_status_delivered">Consegnato</string>
+    <string name="log_status_received">Ricevuto</string>
+    <string name="log_status_pending">In attesa</string>
+    <string name="log_status_failed">Errore</string>
     <string name="log_status_error">Errore</string>
+    <string name="log_detail_format">Direzione: %1$s\n\nMessaggio:\n%2$s\n\nStato: %3$s</string>
+    <string name="logs_cleared">Cronologia cancellata</string>
 
     <!-- Dialogs -->
     <string name="dialog_confirm_disarm_title">Conferma</string>
@@ -99,8 +122,30 @@
     <string name="dialog_sim_title">Seleziona SIM</string>
     <string name="dialog_sim_remember">Ricorda scelta</string>
     <string name="dialog_send">Invia</string>
+    <string name="dialog_disarm_title">Disattiva Allarme</string>
+    <string name="dialog_disarm_message">Confermi di voler disattivare l\'allarme?</string>
+    <string name="dialog_phone_title">Numero Allarme</string>
+    <string name="dialog_arm_title">Attiva Allarme</string>
+    <string name="dialog_arm_message">Attivare allarme con scenario \"%s\"?</string>
+    <string name="dialog_arm_custom_title">Attiva Personalizzato</string>
+    <string name="dialog_arm_custom_message">Attivare allarme con %d zone selezionate?</string>
+    <string name="dialog_cancel_config_title">Annulla Configurazione</string>
+    <string name="dialog_cancel_config_message">La configurazione non è completa. Annullare?</string>
+    <string name="dialog_log_detail_title">Dettaglio Messaggio</string>
+    <string name="dialog_clear_logs_title">Cancella Cronologia</string>
+    <string name="dialog_clear_logs_message">Eliminare tutti i messaggi dalla cronologia?</string>
 
-    <!-- Permissions -->
+    <!-- User Permissions -->
+    <string name="permissions_description">Seleziona i permessi da assegnare a questo utente</string>
+    <string name="permission_rx1">RX1 - Riceve SMS allarme</string>
+    <string name="permission_rx2">RX2 - Riceve SMS stato</string>
+    <string name="permission_verify">VERIFY - Verifica stato</string>
+    <string name="permission_cmd">CMD - Comandi ON/OFF</string>
+    <string name="apply_to_all_users">Applica a tutti gli utenti</string>
+    <string name="user_slot_title">Utente %d</string>
+    <string name="scenario_slot_title">Scenario %d</string>
+
+    <!-- App Permissions -->
     <string name="permission_sms_title">Permessi SMS</string>
     <string name="permission_sms_message">L\'app necessita dei permessi SMS per comunicare con il sistema allarme</string>
     <string name="permission_grant">Concedi</string>
