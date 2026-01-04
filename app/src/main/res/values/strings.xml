@@ -165,4 +165,26 @@
     <string name="cd_navigate_back">Torna indietro</string>
     <string name="cd_status_armed">Sistema attivo</string>
     <string name="cd_status_disarmed">Sistema disattivo</string>
+
+    <!-- Disclaimer -->
+    <string name="title_disclaimer">Termini d\'Uso</string>
+    <string name="disclaimer_title">Importante</string>
+    <string name="disclaimer_text">BHomeAlarm è un\'applicazione non ufficiale per il controllo di sistemi di allarme compatibili tramite SMS.\n\nL\'utilizzo di questa applicazione è a proprio rischio. Lo sviluppatore non si assume alcuna responsabilità per:\n\n• Malfunzionamenti del sistema di allarme\n• Mancata ricezione o invio di comandi SMS\n• Eventuali danni diretti o indiretti derivanti dall\'utilizzo dell\'applicazione\n• Costi SMS addebitati dal proprio operatore telefonico\n\nL\'applicazione richiede i permessi per inviare e ricevere SMS per comunicare con il sistema di allarme.\n\nAssicurarsi che il numero di telefono del sistema allarme sia corretto prima di inviare comandi.</string>
+    <string name="disclaimer_accept_checkbox">Ho letto e accetto i termini d\'uso</string>
+    <string name="action_decline">Rifiuta</string>
+    <string name="action_accept">Accetta</string>
+    <string name="dialog_decline_title">Chiudi Applicazione</string>
+    <string name="dialog_decline_message">Rifiutando i termini d\'uso l\'applicazione verrà chiusa. Continuare?</string>
+
+    <!-- Setup Phone -->
+    <string name="title_setup_phone">Configurazione</string>
+    <string name="setup_phone_title">Numero Sistema Allarme</string>
+    <string name="setup_phone_description">Inserisci il numero di telefono della SIM installata nel tuo sistema di allarme. Questo numero verrà utilizzato per inviare e ricevere comandi SMS.</string>
+    <string name="hint_alarm_phone">Numero telefono allarme</string>
+    <string name="action_pick_contact">Seleziona dalla rubrica</string>
+    <string name="setup_phone_hint">Puoi modificare questo numero in qualsiasi momento dalle impostazioni dell\'app.</string>
+    <string name="action_skip">Salta</string>
+    <string name="error_invalid_phone">Numero di telefono non valido</string>
+    <string name="error_contacts_permission">Permesso rubrica non concesso</string>
+    <string name="error_reading_contact">Errore lettura contatto</string>
 </resources>
