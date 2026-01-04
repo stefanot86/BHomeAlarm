@@ -10,8 +10,6 @@
     android:focusable="true"
     app:cardCornerRadius="12dp"
     app:cardElevation="1dp"
-    app:checkedIcon="@drawable/ic_check"
-    app:checkable="true"
     app:rippleColor="?attr/colorControlHighlight">
 
     <LinearLayout
