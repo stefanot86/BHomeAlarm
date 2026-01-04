@@ -13,6 +13,8 @@ import android.telephony.SubscriptionManager;
 
 import androidx.core.content.ContextCompat;
 
+import android.content.SharedPreferences;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,8 +34,8 @@ public class SmsService {
 
     private final Context context;
     private final AlarmRepository repository;
+    private final SharedPreferences prefs;
     private OnSmsResultListener listener;
-    private int selectedSimSlot = 0;
 
     // Counter per request code univoci dei PendingIntent
     private static final AtomicInteger requestCodeCounter = new AtomicInteger(0);
@@ -41,6 +43,7 @@ public class SmsService {
     private SmsService(Context context) {
         this.context = context.getApplicationContext();
         this.repository = AlarmRepository.getInstance((android.app.Application) this.context);
+        this.prefs = this.context.getSharedPreferences(Constants.PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public static synchronized SmsService getInstance(Context context) {
@@ -62,17 +65,19 @@ public class SmsService {
     /**
      * Imposta lo slot SIM da utilizzare.
      *
-     * @param simSlot Indice SIM (0 o 1)
+     * @param simSlot Indice SIM (0 o 1, -1 per default)
      */
     public void setSelectedSimSlot(int simSlot) {
-        this.selectedSimSlot = simSlot;
+        prefs.edit().putInt(Constants.PREF_SELECTED_SIM, simSlot).apply();
     }
 
     /**
-     * Restituisce lo slot SIM selezionato.
+     * Restituisce lo slot SIM selezionato dalle preferences.
+     *
+     * @return Slot SIM (0, 1) o -1 per default
      */
     public int getSelectedSimSlot() {
-        return selectedSimSlot;
+        return prefs.getInt(Constants.PREF_SELECTED_SIM, -1);
     }
 
     // ========== SIM Information ==========
@@ -167,14 +172,14 @@ public class SmsService {
     // ========== Send SMS ==========
 
     /**
-     * Invia un SMS.
+     * Invia un SMS usando la SIM selezionata nelle impostazioni.
      *
      * @param phoneNumber Numero destinatario
      * @param message Testo del messaggio
      * @return ID univoco del messaggio
      */
     public String sendSms(String phoneNumber, String message) {
-        return sendSms(phoneNumber, message, selectedSimSlot);
+        return sendSms(phoneNumber, message, getSelectedSimSlot());
     }
 
     /**
@@ -254,18 +259,19 @@ public class SmsService {
     }
 
     /**
-     * Invia un comando al sistema allarme.
+     * Invia un comando al sistema allarme usando la SIM selezionata.
      *
      * @param alarmPhoneNumber Numero del sistema allarme
      * @param command Comando da inviare
      * @return ID univoco del messaggio
      */
     public String sendCommand(String alarmPhoneNumber, String command) {
-        return sendSms(alarmPhoneNumber, command, selectedSimSlot);
+        return sendSms(alarmPhoneNumber, command, getSelectedSimSlot());
     }
 
     private SmsManager getSmsManager(int simSlot) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        // Se simSlot è -1, usa la SIM predefinita del sistema
+        if (simSlot >= 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             SubscriptionManager sm = SubscriptionManager.from(context);
 
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)

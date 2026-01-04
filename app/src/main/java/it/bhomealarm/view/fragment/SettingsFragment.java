@@ -15,9 +15,12 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.appbar.MaterialToolbar;
 
+import java.util.List;
+
 import it.bhomealarm.BuildConfig;
 import it.bhomealarm.R;
 import it.bhomealarm.controller.viewmodel.SettingsViewModel;
+import it.bhomealarm.service.SmsService;
 
 /**
  * Fragment per le impostazioni dell'app.
@@ -114,7 +117,14 @@ public class SettingsFragment extends Fragment {
 
         viewModel.getSelectedSimSlot().observe(getViewLifecycleOwner(), simSlot -> {
             if (simSlot != null && simSlot >= 0) {
-                textSim.setText(getString(R.string.sim_slot_format, simSlot + 1));
+                List<SmsService.SimInfo> sims = SmsService.getInstance(requireContext()).getAvailableSims();
+                if (simSlot < sims.size()) {
+                    SmsService.SimInfo sim = sims.get(simSlot);
+                    String displayText = sim.carrierName.isEmpty() ? sim.displayName : sim.carrierName;
+                    textSim.setText(displayText);
+                } else {
+                    textSim.setText(getString(R.string.sim_slot_format, simSlot + 1));
+                }
             } else {
                 textSim.setText(R.string.sim_default);
             }
@@ -146,19 +156,26 @@ public class SettingsFragment extends Fragment {
     }
 
     private void showSimSelectionDialog() {
-        String[] simOptions = {
-                getString(R.string.sim_slot_1),
-                getString(R.string.sim_slot_2),
-                getString(R.string.sim_default)
-        };
+        List<SmsService.SimInfo> sims = SmsService.getInstance(requireContext()).getAvailableSims();
+
+        // Crea array con nomi operatori + opzione default
+        String[] simOptions = new String[sims.size() + 1];
+        for (int i = 0; i < sims.size(); i++) {
+            SmsService.SimInfo sim = sims.get(i);
+            String carrierName = sim.carrierName.isEmpty() ? sim.displayName : sim.carrierName;
+            simOptions[i] = getString(R.string.sim_slot_format, i + 1) + " - " + carrierName;
+        }
+        simOptions[sims.size()] = getString(R.string.sim_default);
 
         Integer currentSim = viewModel.getSelectedSimSlot().getValue();
-        int checkedItem = currentSim != null && currentSim >= 0 ? currentSim : 2;
+        int checkedItem = currentSim != null && currentSim >= 0 && currentSim < sims.size()
+                ? currentSim
+                : sims.size(); // Default option
 
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.dialog_sim_title)
                 .setSingleChoiceItems(simOptions, checkedItem, (dialog, which) -> {
-                    viewModel.saveSelectedSim(which < 2 ? which : -1);
+                    viewModel.saveSelectedSim(which < sims.size() ? which : -1);
                     dialog.dismiss();
                 })
                 .setNegativeButton(R.string.action_cancel, null)
