@@ -1,6 +1,9 @@
 package it.bhomealarm.controller.viewmodel;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,10 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.bhomealarm.callback.OnConfigProgressListener;
+import it.bhomealarm.callback.OnSmsResultListener;
 import it.bhomealarm.model.entity.Scenario;
+import it.bhomealarm.model.entity.SmsLog;
 import it.bhomealarm.model.entity.User;
-import it.bhomealarm.model.entity.Zone;
 import it.bhomealarm.model.repository.AlarmRepository;
+import it.bhomealarm.service.SmsReceiver;
+import it.bhomealarm.service.SmsService;
 import it.bhomealarm.util.Constants;
 import it.bhomealarm.util.SmsParser;
 
@@ -22,7 +28,7 @@ import it.bhomealarm.util.SmsParser;
  * ViewModel per ConfigurationFragment.
  * Gestisce la macchina a stati per configurazione CONF1-5.
  */
-public class ConfigurationViewModel extends AndroidViewModel implements OnConfigProgressListener {
+public class ConfigurationViewModel extends AndroidViewModel implements OnConfigProgressListener, OnSmsResultListener {
 
     /**
      * Stato di un singolo step di configurazione.
@@ -51,6 +57,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     private final AlarmRepository repository;
+    private final SmsService smsService;
+    private final SharedPreferences prefs;
+    private final Handler timeoutHandler;
+
+    // Timeout per attesa risposta SMS
+    private Runnable timeoutRunnable;
+    private String pendingMessageId;
 
     // State Machine
     private int currentState = Constants.CONFIG_STATE_IDLE;
@@ -69,7 +82,18 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     public ConfigurationViewModel(@NonNull Application application) {
         super(application);
         repository = AlarmRepository.getInstance(application);
+        smsService = SmsService.getInstance(application);
+        prefs = application.getSharedPreferences(Constants.PREF_NAME, 0);
+        timeoutHandler = new Handler(Looper.getMainLooper());
         initializeSteps();
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        cancelTimeout();
+        // Rimuovi listener solo se siamo noi
+        SmsReceiver.setListener(null);
     }
 
     // ========== Getters ==========
@@ -129,6 +153,15 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
             return;
         }
 
+        String phone = getAlarmPhoneNumber();
+        if (phone == null) {
+            errorMessage.setValue("Numero allarme non configurato");
+            return;
+        }
+
+        // Registra listener
+        SmsReceiver.setListener(this);
+
         initializeSteps();
         currentState = Constants.CONFIG_STATE_CONF1;
         isRunning.setValue(true);
@@ -136,11 +169,30 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         errorMessage.setValue(null);
         progress.setValue(0);
 
-        addDebugLog("TX: " + Constants.CMD_CONF1);
-        updateStepStatus(1, StepStatus.IN_PROGRESS, "Invio richiesta...");
+        // Avvia CONF1
+        sendConfigCommand(Constants.CMD_CONF1, 1);
+    }
 
-        // TODO: Inviare SMS CONF1? tramite SmsService
-        // smsService.sendCommand(Constants.CMD_CONF1, callback);
+    /**
+     * Invia un comando di configurazione.
+     */
+    private void sendConfigCommand(String command, int stepNumber) {
+        String phone = getAlarmPhoneNumber();
+        if (phone == null) {
+            handleError("Numero allarme non configurato");
+            return;
+        }
+
+        addDebugLog("TX: " + command);
+        updateStepStatus(stepNumber, StepStatus.IN_PROGRESS, "Invio richiesta...");
+
+        pendingMessageId = smsService.sendCommand(phone, command);
+
+        if (pendingMessageId != null) {
+            startTimeout();
+        } else {
+            handleError("Errore invio comando");
+        }
     }
 
     /**
@@ -149,7 +201,16 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
      * @param response Corpo del messaggio SMS
      */
     public void processResponse(String response) {
+        cancelTimeout();
         addDebugLog("RX: " + response);
+
+        // Salva log
+        SmsLog log = new SmsLog();
+        log.setMessage(response);
+        log.setDirection(SmsLog.DIRECTION_INCOMING);
+        log.setStatus(SmsLog.STATUS_RECEIVED);
+        log.setTimestamp(System.currentTimeMillis());
+        repository.insertSmsLog(log);
 
         String responseType = SmsParser.identifyResponse(response);
         if (responseType == null) {
@@ -202,10 +263,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
         // Avanza a CONF2
         currentState = Constants.CONFIG_STATE_CONF2;
-        addDebugLog("TX: " + Constants.CMD_CONF2);
-        updateStepStatus(2, StepStatus.IN_PROGRESS, "Invio richiesta...");
-
-        // TODO: Inviare SMS CONF2?
+        sendConfigCommand(Constants.CMD_CONF2, 2);
     }
 
     private void processConf2(String response) {
@@ -217,10 +275,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
         // Avanza a CONF3
         currentState = Constants.CONFIG_STATE_CONF3;
-        addDebugLog("TX: " + Constants.CMD_CONF3);
-        updateStepStatus(3, StepStatus.IN_PROGRESS, "Invio richiesta...");
-
-        // TODO: Inviare SMS CONF3?
+        sendConfigCommand(Constants.CMD_CONF3, 3);
     }
 
     private void processConf3(String response) {
@@ -232,10 +287,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
         // Avanza a CONF4
         currentState = Constants.CONFIG_STATE_CONF4;
-        addDebugLog("TX: " + Constants.CMD_CONF4);
-        updateStepStatus(4, StepStatus.IN_PROGRESS, "Invio richiesta...");
-
-        // TODO: Inviare SMS CONF4?
+        sendConfigCommand(Constants.CMD_CONF4, 4);
     }
 
     private void processConf4(String response) {
@@ -247,10 +299,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
         // Avanza a CONF5
         currentState = Constants.CONFIG_STATE_CONF5;
-        addDebugLog("TX: " + Constants.CMD_CONF5);
-        updateStepStatus(5, StepStatus.IN_PROGRESS, "Invio richiesta...");
-
-        // TODO: Inviare SMS CONF5?
+        sendConfigCommand(Constants.CMD_CONF5, 5);
     }
 
     private void processConf5(String response) {
@@ -266,6 +315,9 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         isComplete.setValue(true);
         statusMessage.setValue("Configurazione completata!");
 
+        // Salva che la configurazione è stata completata
+        prefs.edit().putBoolean(Constants.PREF_CONFIGURED, true).apply();
+
         addDebugLog("Configurazione completata");
     }
 
@@ -277,6 +329,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
             return;
         }
 
+        cancelTimeout();
         currentState = Constants.CONFIG_STATE_IDLE;
         isRunning.setValue(false);
         statusMessage.setValue("Configurazione annullata");
@@ -289,12 +342,14 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
      * @param error Messaggio errore
      */
     public void handleError(String error) {
+        cancelTimeout();
+
+        int stepNum = getStepNumberFromState(currentState);
         currentState = Constants.CONFIG_STATE_ERROR;
         isRunning.setValue(false);
         errorMessage.setValue(error);
 
         // Marca step corrente come errore
-        int stepNum = getStepNumberFromState(currentState);
         if (stepNum > 0) {
             updateStepStatus(stepNum, StepStatus.ERROR, error);
         }
@@ -315,7 +370,7 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
             ConfigStep step = currentSteps.get(stepNumber - 1);
             step.status = status;
             step.message = message;
-            steps.setValue(currentSteps);
+            steps.setValue(new ArrayList<>(currentSteps)); // Forza update
 
             statusMessage.setValue(step.name + ": " + message);
         }
@@ -346,7 +401,62 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         String timestamp = new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
                 .format(new java.util.Date());
         log.add("[" + timestamp + "] " + message);
-        debugLog.setValue(log);
+        debugLog.setValue(new ArrayList<>(log)); // Forza update
+    }
+
+    private String getAlarmPhoneNumber() {
+        String phone = prefs.getString(Constants.PREF_ALARM_PHONE, "");
+        return phone.isEmpty() ? null : phone;
+    }
+
+    private void startTimeout() {
+        cancelTimeout();
+        timeoutRunnable = () -> {
+            if (Boolean.TRUE.equals(isRunning.getValue())) {
+                handleTimeout();
+            }
+        };
+        // Timeout più lungo per configurazione (60 secondi)
+        timeoutHandler.postDelayed(timeoutRunnable, 60000);
+    }
+
+    private void cancelTimeout() {
+        if (timeoutRunnable != null) {
+            timeoutHandler.removeCallbacks(timeoutRunnable);
+            timeoutRunnable = null;
+        }
+    }
+
+    // ========== OnSmsResultListener ==========
+
+    @Override
+    public void onSmsSent(String messageId) {
+        // SMS inviato, aspettiamo risposta
+        int stepNum = getStepNumberFromState(currentState);
+        if (stepNum > 0) {
+            updateStepStatus(stepNum, StepStatus.IN_PROGRESS, "Attesa risposta...");
+        }
+    }
+
+    @Override
+    public void onSmsDelivered(String messageId) {
+        // SMS consegnato, continuiamo ad aspettare risposta
+    }
+
+    @Override
+    public void onSmsReceived(String sender, String body) {
+        // Processa la risposta
+        processResponse(body);
+    }
+
+    @Override
+    public void onSmsError(int errorCode, String errorMsg) {
+        handleError(errorMsg);
+    }
+
+    @Override
+    public void onSmsTimeout() {
+        handleTimeout();
     }
 
     // ========== OnConfigProgressListener ==========

@@ -39,4 +39,13 @@ public interface SmsLogDao {
 
     @Query("SELECT COUNT(*) FROM sms_log")
     int getLogCount();
+
+    @Query("SELECT * FROM sms_log WHERE message_id = :messageId LIMIT 1")
+    SmsLog getByMessageId(String messageId);
+
+    @Query("UPDATE sms_log SET status = :status WHERE message_id = :messageId")
+    void updateStatus(String messageId, int status);
+
+    @Query("UPDATE sms_log SET status = :status, error_message = :errorMessage WHERE message_id = :messageId")
+    void updateStatusWithError(String messageId, int status, String errorMessage);
 }

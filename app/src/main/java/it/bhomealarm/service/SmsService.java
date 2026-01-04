@@ -16,8 +16,11 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import it.bhomealarm.callback.OnSmsResultListener;
+import it.bhomealarm.model.entity.SmsLog;
+import it.bhomealarm.model.repository.AlarmRepository;
 import it.bhomealarm.util.Constants;
 
 /**
@@ -28,11 +31,16 @@ public class SmsService {
     private static SmsService instance;
 
     private final Context context;
+    private final AlarmRepository repository;
     private OnSmsResultListener listener;
     private int selectedSimSlot = 0;
 
+    // Counter per request code univoci dei PendingIntent
+    private static final AtomicInteger requestCodeCounter = new AtomicInteger(0);
+
     private SmsService(Context context) {
         this.context = context.getApplicationContext();
+        this.repository = AlarmRepository.getInstance((android.app.Application) this.context);
     }
 
     public static synchronized SmsService getInstance(Context context) {
@@ -189,14 +197,28 @@ public class SmsService {
         }
 
         try {
+            // Salva il log nel database con stato PENDING
+            SmsLog log = new SmsLog();
+            log.setMessageId(messageId);
+            log.setMessage(message);
+            log.setDirection(SmsLog.DIRECTION_OUTGOING);
+            log.setStatus(SmsLog.STATUS_PENDING);
+            log.setTimestamp(System.currentTimeMillis());
+            repository.insertSmsLog(log);
+
             SmsManager smsManager = getSmsManager(simSlot);
+
+            // Genera request code univoci per evitare conflitti
+            int sentRequestCode = requestCodeCounter.incrementAndGet();
+            int deliveredRequestCode = requestCodeCounter.incrementAndGet();
 
             // Crea PendingIntent per callback invio
             Intent sentIntent = new Intent(Constants.ACTION_SMS_SENT);
             sentIntent.putExtra("message_id", messageId);
+            sentIntent.setPackage(context.getPackageName());
             PendingIntent sentPI = PendingIntent.getBroadcast(
                     context,
-                    0,
+                    sentRequestCode,
                     sentIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
@@ -204,9 +226,10 @@ public class SmsService {
             // Crea PendingIntent per callback consegna
             Intent deliveredIntent = new Intent(Constants.ACTION_SMS_DELIVERED);
             deliveredIntent.putExtra("message_id", messageId);
+            deliveredIntent.setPackage(context.getPackageName());
             PendingIntent deliveredPI = PendingIntent.getBroadcast(
                     context,
-                    0,
+                    deliveredRequestCode,
                     deliveredIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );

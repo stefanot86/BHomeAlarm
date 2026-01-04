@@ -283,4 +283,25 @@ public class AlarmRepository {
     public void clearAllLogs() {
         executorService.execute(smsLogDao::deleteAll);
     }
+
+    /**
+     * Aggiorna lo stato di un log SMS tramite messageId.
+     */
+    public void updateSmsLogStatus(String messageId, int status) {
+        executorService.execute(() -> smsLogDao.updateStatus(messageId, status));
+    }
+
+    /**
+     * Aggiorna lo stato di un log SMS con messaggio di errore.
+     */
+    public void updateSmsLogStatusWithError(String messageId, int status, String errorMessage) {
+        executorService.execute(() -> smsLogDao.updateStatusWithError(messageId, status, errorMessage));
+    }
+
+    /**
+     * Ottiene un log SMS tramite messageId (sincrono).
+     */
+    public SmsLog getSmsLogByMessageId(String messageId) {
+        return smsLogDao.getByMessageId(messageId);
+    }
 }
