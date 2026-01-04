@@ -1,15 +1,22 @@
 package it.bhomealarm.service;
 
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 import it.bhomealarm.callback.OnSmsResultListener;
+import it.bhomealarm.model.entity.SmsLog;
+import it.bhomealarm.model.repository.AlarmRepository;
 import it.bhomealarm.util.Constants;
 import it.bhomealarm.util.PhoneNumberUtils;
+import it.bhomealarm.util.SmsParser;
 
 /**
  * BroadcastReceiver per SMS in arrivo.
@@ -17,6 +24,7 @@ import it.bhomealarm.util.PhoneNumberUtils;
  */
 public class SmsReceiver extends BroadcastReceiver {
 
+    private static final String TAG = "SmsReceiver";
     private static OnSmsResultListener listener;
 
     /**
@@ -24,6 +32,13 @@ public class SmsReceiver extends BroadcastReceiver {
      */
     public static void setListener(OnSmsResultListener listener) {
         SmsReceiver.listener = listener;
+    }
+
+    /**
+     * Restituisce il listener attuale.
+     */
+    public static OnSmsResultListener getListener() {
+        return listener;
     }
 
     @Override
@@ -79,11 +94,61 @@ public class SmsReceiver extends BroadcastReceiver {
         // Verifica se il messaggio è dal sistema allarme
         if (isFromAlarm(context, sender)) {
             String messageBody = fullMessage.toString();
+            Log.d(TAG, "SMS ricevuto dall'allarme: " + messageBody);
+
+            // Salva sempre nel database
+            saveToDatabase(context, messageBody);
+
+            // Processa la risposta e aggiorna lo stato nelle SharedPreferences
+            processAndSaveStatus(context, messageBody);
+
+            // Notifica il listener se presente (per aggiornamento UI immediato)
             notifyMessageReceived(sender, messageBody);
 
             // Abort broadcast per non mostrare notifica SMS standard
-            // Nota: Richiede priority alta nel manifest
             abortBroadcast();
+        }
+    }
+
+    /**
+     * Salva il messaggio nel database.
+     */
+    private void saveToDatabase(Context context, String messageBody) {
+        try {
+            AlarmRepository repository = AlarmRepository.getInstance((Application) context.getApplicationContext());
+            SmsLog log = new SmsLog();
+            log.setMessage(messageBody);
+            log.setDirection(SmsLog.DIRECTION_INCOMING);
+            log.setStatus(SmsLog.STATUS_RECEIVED);
+            log.setTimestamp(System.currentTimeMillis());
+            repository.insertSmsLog(log);
+        } catch (Exception e) {
+            Log.e(TAG, "Errore salvataggio SMS nel database", e);
+        }
+    }
+
+    /**
+     * Processa la risposta SMS e salva lo stato nelle SharedPreferences.
+     * Questo assicura che lo stato sia aggiornato anche se l'app non è in foreground.
+     */
+    private void processAndSaveStatus(Context context, String messageBody) {
+        try {
+            String responseType = SmsParser.identifyResponse(messageBody);
+
+            if ("OK".equals(responseType) || "STATUS".equals(responseType)) {
+                SmsParser.ResponseData data = SmsParser.parseResponse(messageBody);
+
+                if (data.success && data.status != null) {
+                    SharedPreferences prefs = context.getSharedPreferences(Constants.PREF_NAME, Context.MODE_PRIVATE);
+                    prefs.edit()
+                            .putString(Constants.PREF_LAST_STATUS, data.status)
+                            .putLong(Constants.PREF_LAST_CHECK_TIME, System.currentTimeMillis())
+                            .apply();
+                    Log.d(TAG, "Stato salvato: " + data.status);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Errore processamento risposta SMS", e);
         }
     }
 
@@ -127,10 +192,16 @@ public class SmsReceiver extends BroadcastReceiver {
 
     /**
      * Notifica il listener che è stato ricevuto un messaggio dall'allarme.
+     * Esegue sul main thread per sicurezza con LiveData.
      */
     private void notifyMessageReceived(String sender, String body) {
         if (listener != null) {
-            listener.onSmsReceived(sender, body);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                // Ricontrolla listener perché potrebbe essere cambiato
+                if (listener != null) {
+                    listener.onSmsReceived(sender, body);
+                }
+            });
         }
     }
 }

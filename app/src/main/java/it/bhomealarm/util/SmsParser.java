@@ -239,12 +239,58 @@ public final class SmsParser {
         } else if (content.startsWith(Constants.RESP_ERROR)) {
             data.success = false;
             data.errorCode = content.substring(4);
+        } else if (content.startsWith("SYS:") || content.startsWith("SYS :")) {
+            // Formato reale: SYS: ON/OFF con altre righe
+            data.success = true;
+            parseRealStatusFormat(content, data);
         } else {
             data.success = false;
             data.errorCode = Constants.ERROR_UNKNOWN_CMD;
         }
 
         return data;
+    }
+
+    /**
+     * Parsa il formato reale di risposta stato:
+     * SYS: ON
+     * SCE:---
+     * ZONES:cont giorno;cont notte;volumetrici;porta;zona 7
+     * 230V: KO
+     * BATT: OK
+     */
+    private static void parseRealStatusFormat(String content, ResponseData data) {
+        String[] lines = content.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+
+            if (line.startsWith("SYS:") || line.startsWith("SYS :")) {
+                // Estrai stato: ON = ARMED, OFF = DISARMED
+                String sysValue = line.substring(line.indexOf(":") + 1).trim();
+                if ("ON".equalsIgnoreCase(sysValue)) {
+                    data.status = Constants.STATUS_ARMED;
+                } else if ("OFF".equalsIgnoreCase(sysValue)) {
+                    data.status = Constants.STATUS_DISARMED;
+                } else if (sysValue.toUpperCase().contains("ALARM")) {
+                    data.status = Constants.STATUS_ALARM;
+                } else if (sysValue.toUpperCase().contains("TAMPER")) {
+                    data.status = Constants.STATUS_TAMPER;
+                } else {
+                    data.status = Constants.STATUS_UNKNOWN;
+                }
+            } else if (line.startsWith("SCE:")) {
+                // Scenario attivo
+                String scenario = line.substring(4).trim();
+                if (!"---".equals(scenario) && !scenario.isEmpty()) {
+                    data.scenario = scenario;
+                }
+            } else if (line.startsWith("ZONES:")) {
+                // Zone attive
+                data.zones = line.substring(6).trim();
+            }
+            // 230V e BATT sono informativi, non li processiamo per ora
+        }
     }
 
     private static void parseOkDetails(String details, ResponseData data) {
@@ -309,7 +355,7 @@ public final class SmsParser {
      * Identifica il tipo di risposta.
      *
      * @param response Risposta SMS
-     * @return Prefisso identificativo (CONF1, OK, etc.) o null
+     * @return Prefisso identificativo (CONF1, OK, STATUS, etc.) o null
      */
     public static String identifyResponse(String response) {
         if (response == null) return null;
@@ -322,6 +368,9 @@ public final class SmsParser {
         if (response.startsWith(Constants.RESP_OK)) return "OK";
         if (response.startsWith(Constants.RESP_STATUS)) return "STATUS";
         if (response.startsWith(Constants.RESP_ERROR)) return "ERROR";
+
+        // Formato alternativo: SYS: ON/OFF (risposta stato reale)
+        if (response.startsWith("SYS:") || response.startsWith("SYS :")) return "STATUS";
 
         return null;
     }

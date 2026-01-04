@@ -63,6 +63,13 @@ public class HomeFragment extends Fragment {
         observeData();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Ricarica lo stato in caso di SMS ricevuti mentre l'app era in background
+        viewModel.refreshStatus();
+    }
+
     private void setupViews(View view) {
         toolbar = view.findViewById(R.id.toolbar);
         cardStatus = view.findViewById(R.id.card_status);

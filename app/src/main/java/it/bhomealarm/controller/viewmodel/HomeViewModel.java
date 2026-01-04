@@ -256,13 +256,8 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
     public void onSmsReceived(String sender, String body) {
         cancelTimeout();
 
-        // Salva il log della risposta ricevuta
-        SmsLog log = new SmsLog();
-        log.setMessage(body);
-        log.setDirection(SmsLog.DIRECTION_INCOMING);
-        log.setStatus(SmsLog.STATUS_RECEIVED);
-        log.setTimestamp(System.currentTimeMillis());
-        repository.insertSmsLog(log);
+        // Il salvataggio nel database è già gestito da SmsReceiver
+        // Qui processiamo solo per aggiornare l'UI
 
         // Parsa la risposta
         String responseType = SmsParser.identifyResponse(body);
@@ -282,6 +277,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         } else {
             // Risposta non riconosciuta, potrebbe essere una risposta CONF
             // Non è un errore, ignoriamo silenziosamente
+            isLoading.setValue(false);
         }
     }
 
@@ -334,6 +330,16 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
 
         boolean configured = prefs.getBoolean(Constants.PREF_CONFIGURED, false);
         isConfigured.setValue(configured);
+    }
+
+    /**
+     * Ricarica lo stato dalle SharedPreferences.
+     * Utile quando l'app torna in foreground dopo aver ricevuto SMS in background.
+     */
+    public void refreshStatus() {
+        loadSavedStatus();
+        // Assicura che il listener sia registrato
+        SmsReceiver.setListener(this);
     }
 
     private void saveStatus(String status) {
