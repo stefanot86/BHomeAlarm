@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per un singolo elemento scenario nella lista scenari.
+    Mostra le informazioni dello scenario (nome e zone incluse)
+    all'interno di una card cliccabile per selezionare lo scenario.
+-->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,6 +24,7 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <!-- Icona dello scenario (casa, notte, ecc.) -->
         <ImageView
             android:id="@+id/icon_scenario"
             android:layout_width="40dp"
@@ -26,6 +32,7 @@
             android:src="@drawable/ic_home"
             app:tint="?attr/colorPrimary" />
 
+        <!-- Sezione informazioni scenario -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -33,6 +40,7 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- Nome dello scenario -->
             <TextView
                 android:id="@+id/text_scenario_name"
                 android:layout_width="wrap_content"
@@ -40,6 +48,7 @@
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 tools:text="Casa" />
 
+            <!-- Lista zone incluse nello scenario -->
             <TextView
                 android:id="@+id/text_scenario_zones"
                 android:layout_width="wrap_content"
@@ -49,6 +58,7 @@
 
         </LinearLayout>
 
+        <!-- Freccia navigazione -->
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"

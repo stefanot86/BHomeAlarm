@@ -19,7 +19,28 @@ import it.bhomealarm.controller.viewmodel.ConfigurationViewModel.ConfigStep;
 import it.bhomealarm.controller.viewmodel.ConfigurationViewModel.StepStatus;
 
 /**
- * Adapter per la lista degli step di configurazione.
+ * Adapter per la visualizzazione degli step di configurazione del sistema.
+ * <p>
+ * Questo adapter gestisce una lista di {@link ConfigStep} mostrando il progresso
+ * della procedura di configurazione iniziale. Utilizza il layout {@code item_config_step.xml}
+ * che presenta un'icona di stato, il nome dello step e un messaggio di stato opzionale.
+ * </p>
+ * <p>
+ * Ogni step puo' trovarsi in uno dei seguenti stati:
+ * <ul>
+ *     <li><b>PENDING</b>: step in attesa, mostra icona grigia</li>
+ *     <li><b>IN_PROGRESS</b>: step in esecuzione, mostra indicatore di progresso circolare</li>
+ *     <li><b>COMPLETED</b>: step completato con successo, mostra icona di spunta verde</li>
+ *     <li><b>ERROR</b>: step fallito, mostra icona di errore rossa con messaggio</li>
+ * </ul>
+ * </p>
+ * <p>
+ * L'adapter non supporta interazione utente (click) poiche' gli step vengono
+ * eseguiti automaticamente in sequenza dal sistema.
+ * </p>
+ *
+ * @see ConfigStep
+ * @see StepStatus
  */
 public class ConfigStepsAdapter extends ListAdapter<ConfigStep, ConfigStepsAdapter.ConfigStepViewHolder> {
 
@@ -53,12 +74,28 @@ public class ConfigStepsAdapter extends ListAdapter<ConfigStep, ConfigStepsAdapt
         holder.bind(getItem(position));
     }
 
+    /**
+     * ViewHolder per la visualizzazione di un singolo step di configurazione.
+     * <p>
+     * Gestisce la visualizzazione dello stato dello step con icona/indicatore di progresso
+     * appropriato e messaggi di stato contestuali.
+     * </p>
+     */
     static class ConfigStepViewHolder extends RecyclerView.ViewHolder {
+        /** Icona per visualizzare lo stato dello step (pending, completato, errore). */
         private final ImageView iconStatus;
+        /** TextView per visualizzare il nome/descrizione dello step. */
         private final TextView textStepName;
+        /** TextView per visualizzare il messaggio di stato o progresso. */
         private final TextView textStepStatus;
+        /** Indicatore di progresso circolare mostrato durante l'esecuzione dello step. */
         private final CircularProgressIndicator progressStep;
 
+        /**
+         * Costruisce un nuovo ViewHolder per l'elemento step di configurazione.
+         *
+         * @param itemView la vista radice dell'elemento
+         */
         ConfigStepViewHolder(@NonNull View itemView) {
             super(itemView);
             iconStatus = itemView.findViewById(R.id.icon_status);
@@ -67,6 +104,20 @@ public class ConfigStepsAdapter extends ListAdapter<ConfigStep, ConfigStepsAdapt
             progressStep = itemView.findViewById(R.id.progress_step);
         }
 
+        /**
+         * Associa i dati di uno step di configurazione a questa vista.
+         * <p>
+         * Aggiorna la visualizzazione in base allo stato corrente dello step:
+         * <ul>
+         *     <li><b>PENDING</b>: mostra icona grigia, nasconde messaggio</li>
+         *     <li><b>IN_PROGRESS</b>: mostra indicatore di progresso e messaggio "In corso..."</li>
+         *     <li><b>COMPLETED</b>: mostra icona spunta verde e messaggio "Completato"</li>
+         *     <li><b>ERROR</b>: mostra icona errore rossa e messaggio di errore</li>
+         * </ul>
+         * </p>
+         *
+         * @param step lo step di configurazione da visualizzare
+         */
         void bind(ConfigStep step) {
             textStepName.setText(step.name);
 

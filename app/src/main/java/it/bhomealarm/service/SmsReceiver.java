@@ -19,28 +19,80 @@ import it.bhomealarm.util.PhoneNumberUtils;
 import it.bhomealarm.util.SmsParser;
 
 /**
- * BroadcastReceiver per SMS in arrivo.
- * Filtra messaggi dal sistema allarme e notifica il SmsService.
+ * BroadcastReceiver per la gestione degli SMS in arrivo e dei callback di invio/consegna.
+ * <p>
+ * Questo receiver gestisce tre tipi di eventi:
+ * <ul>
+ *     <li><b>SMS_RECEIVED</b>: Intercetta gli SMS in arrivo e filtra quelli provenienti
+ *         dal sistema di allarme configurato</li>
+ *     <li><b>SMS_SENT</b>: Riceve la conferma che un SMS e' stato inviato correttamente</li>
+ *     <li><b>SMS_DELIVERED</b>: Riceve la conferma che un SMS e' stato consegnato al destinatario</li>
+ * </ul>
+ * <p>
+ * Quando un SMS viene ricevuto dal sistema di allarme, il receiver:
+ * <ol>
+ *     <li>Verifica che il mittente corrisponda al numero dell'allarme configurato</li>
+ *     <li>Salva il messaggio nel database per lo storico</li>
+ *     <li>Processa la risposta per aggiornare lo stato dell'allarme nelle SharedPreferences</li>
+ *     <li>Notifica il listener per l'aggiornamento immediato dell'UI</li>
+ *     <li>Blocca il broadcast per evitare la notifica SMS standard del sistema</li>
+ * </ol>
+ * <p>
+ * Il receiver deve essere registrato nel AndroidManifest.xml con le action appropriate
+ * e con priorita' alta per intercettare gli SMS prima di altre app.
+ *
+ * @author BHomeAlarm Team
+ * @version 1.0
+ * @see OnSmsResultListener
+ * @see SmsService
+ * @see SmsParser
  */
 public class SmsReceiver extends BroadcastReceiver {
 
+    /**
+     * Tag per il logging delle operazioni del receiver.
+     */
     private static final String TAG = "SmsReceiver";
+
+    /**
+     * Listener statico per notificare i componenti dell'applicazione
+     * quando vengono ricevuti messaggi dal sistema di allarme.
+     * E' statico per permettere la registrazione prima della ricezione degli SMS.
+     */
     private static OnSmsResultListener listener;
 
     /**
-     * Imposta il listener per messaggi ricevuti.
+     * Imposta il listener per ricevere notifiche sui messaggi SMS ricevuti.
+     * Il listener verra' chiamato sul main thread quando un SMS dal sistema
+     * di allarme viene ricevuto.
+     *
+     * @param listener Implementazione di OnSmsResultListener, o null per rimuovere il listener
      */
     public static void setListener(OnSmsResultListener listener) {
         SmsReceiver.listener = listener;
     }
 
     /**
-     * Restituisce il listener attuale.
+     * Restituisce il listener attualmente registrato.
+     *
+     * @return Il listener corrente, o null se nessun listener e' registrato
      */
     public static OnSmsResultListener getListener() {
         return listener;
     }
 
+    /**
+     * Metodo principale chiamato dal sistema Android quando viene ricevuto un broadcast.
+     * Gestisce tre tipi di action:
+     * <ul>
+     *     <li>{@link Constants#ACTION_SMS_RECEIVED}: SMS in arrivo</li>
+     *     <li>{@link Constants#ACTION_SMS_SENT}: Conferma invio SMS</li>
+     *     <li>{@link Constants#ACTION_SMS_DELIVERED}: Conferma consegna SMS</li>
+     * </ul>
+     *
+     * @param context Contesto dell'applicazione
+     * @param intent  Intent contenente i dati del broadcast
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) {
@@ -58,6 +110,14 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Gestisce la ricezione di un SMS in arrivo.
+     * Estrae il mittente e il corpo del messaggio dai PDU, verifica se proviene
+     * dal sistema di allarme e, in caso positivo, processa il messaggio.
+     *
+     * @param context Contesto dell'applicazione
+     * @param intent  Intent contenente i PDU dell'SMS
+     */
     private void handleIncomingSms(Context context, Intent intent) {
         Bundle bundle = intent.getExtras();
         if (bundle == null) {
@@ -111,7 +171,11 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Salva il messaggio nel database.
+     * Salva il messaggio ricevuto nel database per lo storico delle comunicazioni.
+     * Il messaggio viene salvato con direzione INCOMING e stato RECEIVED.
+     *
+     * @param context     Contesto dell'applicazione per accedere al repository
+     * @param messageBody Corpo del messaggio SMS ricevuto
      */
     private void saveToDatabase(Context context, String messageBody) {
         try {
@@ -128,8 +192,14 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Processa la risposta SMS e salva lo stato nelle SharedPreferences.
-     * Questo assicura che lo stato sia aggiornato anche se l'app non è in foreground.
+     * Processa la risposta SMS e salva lo stato dell'allarme nelle SharedPreferences.
+     * <p>
+     * Questo metodo assicura che lo stato dell'allarme sia aggiornato anche quando
+     * l'applicazione non e' in primo piano. Utilizza {@link SmsParser} per interpretare
+     * la risposta e estrarre lo stato corrente del sistema.
+     *
+     * @param context     Contesto dell'applicazione
+     * @param messageBody Corpo del messaggio SMS da processare
      */
     private void processAndSaveStatus(Context context, String messageBody) {
         try {
@@ -152,6 +222,12 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Gestisce il callback di conferma invio SMS.
+     * Recupera l'ID del messaggio e il codice risultato e li inoltra al SmsService.
+     *
+     * @param intent Intent contenente l'ID del messaggio
+     */
     private void handleSmsSentResult(Intent intent) {
         String messageId = intent.getStringExtra("message_id");
         int resultCode = getResultCode();
@@ -162,6 +238,12 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Gestisce il callback di conferma consegna SMS.
+     * Recupera l'ID del messaggio e il codice risultato e li inoltra al SmsService.
+     *
+     * @param intent Intent contenente l'ID del messaggio
+     */
     private void handleSmsDeliveredResult(Intent intent) {
         String messageId = intent.getStringExtra("message_id");
         int resultCode = getResultCode();
@@ -173,11 +255,13 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Verifica se il mittente è il sistema allarme configurato.
+     * Verifica se il mittente dell'SMS corrisponde al numero del sistema di allarme configurato.
+     * Utilizza {@link PhoneNumberUtils#matches(String, String)} per un confronto flessibile
+     * che gestisce diversi formati di numeri telefonici.
      *
-     * @param context Context
-     * @param sender Numero mittente
-     * @return true se è il numero dell'allarme
+     * @param context Contesto per accedere alle SharedPreferences
+     * @param sender  Numero di telefono del mittente dell'SMS
+     * @return true se il mittente corrisponde al numero dell'allarme, false altrimenti
      */
     private boolean isFromAlarm(Context context, String sender) {
         SharedPreferences prefs = context.getSharedPreferences(Constants.PREF_NAME, Context.MODE_PRIVATE);
@@ -191,8 +275,12 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Notifica il listener che è stato ricevuto un messaggio dall'allarme.
-     * Esegue sul main thread per sicurezza con LiveData.
+     * Notifica il listener che e' stato ricevuto un messaggio dal sistema di allarme.
+     * La notifica viene eseguita sul main thread tramite Handler per garantire
+     * la compatibilita' con LiveData e l'aggiornamento dell'UI.
+     *
+     * @param sender Numero di telefono del mittente
+     * @param body   Corpo del messaggio SMS
      */
     private void notifyMessageReceived(String sender, String body) {
         if (listener != null) {

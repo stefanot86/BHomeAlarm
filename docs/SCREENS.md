@@ -469,15 +469,20 @@ L'app utilizza Material Design 3 (Material You) con:
 
 ---
 
-### 12. ZonesFragment
+### 12. ZonesFragment (Crea Scenario)
 
-**Scopo**: Selezione zone per scenario personalizzato
+**Scopo**: Creazione scenario personalizzato con nome e selezione zone
 
 **Layout**:
 ```
 ┌────────────────────────────┐
-│ ← Seleziona Zone           │
+│ ← Crea Scenario            │
 ├────────────────────────────┤
+│                            │
+│  ┌──────────────────────┐  │
+│  │ Nome scenario        │  │
+│  │ [__________________ ]│  │ ← TextInputLayout (outlined)
+│  └──────────────────────┘  │
 │                            │
 │  Seleziona le zone da      │
 │  includere nello scenario  │
@@ -493,22 +498,29 @@ L'app utilizza Material Design 3 (Material You) con:
 │  ├──────────────────────┤  │
 │  │ [ ] Zona 5 - Bagno   │  │
 │  ├──────────────────────┤  │
-│  │ [ ] Zona 6 - Garage  │  │
-│  ├──────────────────────┤  │
-│  │ [ ] Zona 7 - Giardino│  │
-│  ├──────────────────────┤  │
-│  │ [ ] Zona 8 - Esterno │  │
+│  │ ...                  │  │
 │  └──────────────────────┘  │
 │                            │
 ├────────────────────────────┤
-│ [ ANNULLA ]  [ ATTIVA ]    │
+│ 3 zone selezionate         │
+│ [ ANNULLA ]   [ SALVA ]    │
 └────────────────────────────┘
 ```
 
 **Componenti MD3**:
-- `RecyclerView` con checkbox
-- Count zone selezionate in TopAppBar
-- FAB Extended per azione principale (alternativa)
+- `TextInputLayout` (outlined) per nome scenario
+- `NestedScrollView` con `RecyclerView` per zone
+- `MaterialButton` per Annulla (text) e Salva (filled)
+- Count zone selezionate nella bottom bar
+
+**Flusso**:
+1. Utente inserisce nome scenario
+2. Seleziona le zone desiderate
+3. Click "Salva" (abilitato solo se nome + almeno 1 zona)
+4. Scenario salvato nel database locale
+5. Dialog "Armare ora?" con opzioni Sì/No
+6. Se Sì → invia `CUST:NNN` e torna a Home
+7. Se No → torna a Home senza armare
 
 ---
 
@@ -552,6 +564,42 @@ L'app utilizza Material Design 3 (Material You) con:
 │                            │
 ├────────────────────────────┤
 │ [ ANNULLA ]  [ DISATTIVA ] │
+└────────────────────────────┘
+```
+
+### DeleteScenarioDialog
+
+**Scopo**: Conferma eliminazione scenario (trigger: long press)
+
+```
+┌────────────────────────────┐
+│     Elimina Scenario       │
+├────────────────────────────┤
+│                            │
+│  Eliminare lo scenario     │
+│  "Casa"?                   │
+│                            │
+├────────────────────────────┤
+│ [ ANNULLA ]  [ ELIMINA ]   │
+└────────────────────────────┘
+```
+
+### ArmAfterSaveDialog
+
+**Scopo**: Chiede se armare dopo salvataggio scenario
+
+```
+┌────────────────────────────┐
+│     Armare ora?            │
+├────────────────────────────┤
+│                            │
+│  Lo scenario "Notte" è     │
+│  stato salvato. Vuoi       │
+│  attivare l'allarme        │
+│  adesso?                   │
+│                            │
+├────────────────────────────┤
+│ [ NO ]         [ SI ]      │
 └────────────────────────────┘
 ```
 

@@ -12,15 +12,55 @@ import it.bhomealarm.model.repository.AlarmRepository;
 import it.bhomealarm.util.Constants;
 
 /**
- * BroadcastReceiver per gestire i callback di invio e consegna SMS.
- * Registrato nel AndroidManifest per ricevere:
- * - ACTION_SMS_SENT: quando l'SMS è stato inviato
- * - ACTION_SMS_DELIVERED: quando l'SMS è stato consegnato
+ * BroadcastReceiver dedicato alla gestione dei callback di invio e consegna SMS.
+ * <p>
+ * Questo receiver e' registrato nel AndroidManifest.xml per ricevere due tipi di broadcast:
+ * <ul>
+ *     <li><b>{@link Constants#ACTION_SMS_SENT}</b>: Notifica quando un SMS e' stato
+ *         trasmesso con successo alla rete cellulare</li>
+ *     <li><b>{@link Constants#ACTION_SMS_DELIVERED}</b>: Notifica quando un SMS
+ *         e' stato effettivamente consegnato al destinatario</li>
+ * </ul>
+ * <p>
+ * Per ogni evento, il receiver:
+ * <ol>
+ *     <li>Estrae l'ID univoco del messaggio dall'intent</li>
+ *     <li>Verifica il codice risultato dell'operazione</li>
+ *     <li>Aggiorna lo stato del messaggio nel database tramite {@link AlarmRepository}</li>
+ *     <li>Notifica il {@link SmsService} per propagare l'evento ai listener</li>
+ * </ol>
+ * <p>
+ * Gli stati possibili del messaggio nel database sono:
+ * <ul>
+ *     <li>PENDING: In attesa di invio</li>
+ *     <li>SENT: Inviato alla rete</li>
+ *     <li>DELIVERED: Consegnato al destinatario</li>
+ *     <li>FAILED: Invio fallito con messaggio di errore</li>
+ * </ul>
+ *
+ * @author BHomeAlarm Team
+ * @version 1.0
+ * @see SmsService
+ * @see SmsLog
+ * @see AlarmRepository
  */
 public class SmsSentReceiver extends BroadcastReceiver {
 
+    /**
+     * Tag per il logging delle operazioni del receiver.
+     */
     private static final String TAG = "SmsSentReceiver";
 
+    /**
+     * Metodo principale chiamato dal sistema Android quando viene ricevuto un broadcast
+     * relativo allo stato di invio o consegna di un SMS.
+     * <p>
+     * Gestisce le action {@link Constants#ACTION_SMS_SENT} e {@link Constants#ACTION_SMS_DELIVERED},
+     * aggiornando il database e notificando il SmsService del risultato.
+     *
+     * @param context Contesto dell'applicazione
+     * @param intent  Intent contenente l'action e l'ID del messaggio
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) {
@@ -56,6 +96,18 @@ public class SmsSentReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Gestisce il callback di conferma invio SMS.
+     * <p>
+     * Se l'invio e' avvenuto con successo (RESULT_OK), aggiorna lo stato del messaggio
+     * a SENT nel database. In caso di errore, salva lo stato FAILED insieme al
+     * messaggio di errore descrittivo.
+     *
+     * @param repository Repository per l'accesso al database
+     * @param smsService Servizio SMS per notificare i listener
+     * @param messageId  ID univoco del messaggio
+     * @param resultCode Codice risultato dell'operazione (Activity.RESULT_OK per successo)
+     */
     private void handleSmsSent(AlarmRepository repository, SmsService smsService,
                                String messageId, int resultCode) {
         if (resultCode == Activity.RESULT_OK) {
@@ -70,6 +122,19 @@ public class SmsSentReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Gestisce il callback di conferma consegna SMS.
+     * <p>
+     * Se la consegna e' avvenuta con successo (RESULT_OK), aggiorna lo stato del messaggio
+     * a DELIVERED nel database. In caso di errore nel report di consegna, non modifica
+     * lo stato a FAILED perche' l'SMS potrebbe essere stato consegnato ma il report
+     * di consegna non e' disponibile (dipende dall'operatore).
+     *
+     * @param repository Repository per l'accesso al database
+     * @param smsService Servizio SMS per notificare i listener
+     * @param messageId  ID univoco del messaggio
+     * @param resultCode Codice risultato dell'operazione (Activity.RESULT_OK per successo)
+     */
     private void handleSmsDelivered(AlarmRepository repository, SmsService smsService,
                                     String messageId, int resultCode) {
         if (resultCode == Activity.RESULT_OK) {
@@ -84,6 +149,23 @@ public class SmsSentReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Converte un codice di errore SmsManager in un messaggio descrittivo in italiano.
+     * <p>
+     * I codici di errore sono definiti in {@link SmsManager} e includono:
+     * <ul>
+     *     <li>RESULT_ERROR_GENERIC_FAILURE: Errore generico di invio</li>
+     *     <li>RESULT_ERROR_NO_SERVICE: Nessun servizio di rete</li>
+     *     <li>RESULT_ERROR_NULL_PDU: Errore nel formato PDU</li>
+     *     <li>RESULT_ERROR_RADIO_OFF: Radio cellulare disattivata</li>
+     *     <li>RESULT_ERROR_LIMIT_EXCEEDED: Limite SMS raggiunto</li>
+     *     <li>RESULT_ERROR_SHORT_CODE_NOT_ALLOWED: Numero breve non consentito</li>
+     *     <li>RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED: Numero breve bloccato permanentemente</li>
+     * </ul>
+     *
+     * @param resultCode Codice errore restituito da SmsManager
+     * @return Messaggio di errore descrittivo in italiano
+     */
     private String getErrorMessage(int resultCode) {
         switch (resultCode) {
             case SmsManager.RESULT_ERROR_GENERIC_FAILURE:

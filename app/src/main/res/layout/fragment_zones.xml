@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per la schermata di creazione scenario personalizzato.
+
+    Struttura:
+    - Toolbar con titolo e pulsante indietro
+    - Area scrollabile con:
+        - Campo di input per il nome dello scenario
+        - Istruzioni per l'utente
+        - Lista delle zone selezionabili
+    - Barra inferiore fissa con conteggio zone e pulsanti Annulla/Salva
+
+    Utilizza ConstraintLayout come root per gestire correttamente
+    la tastiera virtuale (windowSoftInputMode="adjustResize" nel manifest).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,6 +22,7 @@
     android:background="?android:colorBackground"
     tools:context=".view.fragment.ZonesFragment">
 
+    <!-- Toolbar con titolo "Crea Scenario" e freccia indietro -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -16,6 +31,11 @@
         app:navigationIcon="@drawable/ic_arrow_back"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!--
+        Area scrollabile principale.
+        Contiene il campo nome, le istruzioni e la lista zone.
+        fillViewport="true" assicura che il contenuto occupi tutto lo spazio disponibile.
+    -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -29,7 +49,12 @@
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
-            <!-- Scenario Name Input -->
+            <!--
+                Campo di input per il nome dello scenario.
+                - Stile Material Design 3 OutlinedBox
+                - Limite di 20 caratteri
+                - Mostra errore se si tenta di salvare senza nome
+            -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_name"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -48,7 +73,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Instructions -->
+            <!-- Testo istruzioni per l'utente -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,7 +83,12 @@
                 android:text="@string/zones_instruction"
                 android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-            <!-- Zones List -->
+            <!--
+                Lista delle zone selezionabili.
+                Ogni item mostra checkbox + nome zona.
+                nestedScrollingEnabled="false" per far funzionare correttamente
+                lo scroll all'interno di NestedScrollView.
+            -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_zones"
                 android:layout_width="match_parent"
@@ -74,7 +104,15 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Bar -->
+    <!--
+        Barra inferiore fissa.
+        Contiene:
+        - Conteggio zone selezionate (es. "3 zone selezionate")
+        - Pulsante Annulla (text button)
+        - Pulsante Salva (filled button, disabilitato finché non valido)
+
+        L'elevation crea l'effetto ombra per separare visivamente dalla lista.
+    -->
     <LinearLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
@@ -86,6 +124,7 @@
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Mostra il conteggio delle zone selezionate -->
         <TextView
             android:id="@+id/text_selected_count"
             android:layout_width="0dp"
@@ -95,6 +134,7 @@
             android:textAppearance="?attr/textAppearanceBodyMedium"
             tools:text="3 zone selezionate" />
 
+        <!-- Pulsante per annullare e tornare indietro -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_cancel"
             style="@style/Widget.Material3.Button.TextButton"
@@ -102,6 +142,12 @@
             android:layout_height="wrap_content"
             android:text="@string/action_cancel" />
 
+        <!--
+            Pulsante per salvare lo scenario.
+            Inizialmente disabilitato, si abilita quando:
+            - È stato inserito un nome
+            - È stata selezionata almeno una zona
+        -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save"
             android:layout_width="wrap_content"

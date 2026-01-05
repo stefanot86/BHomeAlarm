@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Configurazione dell'applicazione BHomeAlarm.
+    Questa schermata gestisce il processo di configurazione iniziale del sistema,
+    mostrando il progresso e i singoli step di configurazione via SMS.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,10 +12,12 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.ConfigurationFragment">
 
+    <!-- Sezione AppBar con toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Toolbar con pulsante indietro e titolo -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -27,7 +34,10 @@
         android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Progress Card -->
+        <!-- ========================================== -->
+        <!-- CARD PROGRESSO CONFIGURAZIONE              -->
+        <!-- Mostra la barra di avanzamento e lo stato -->
+        <!-- ========================================== -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,6 +51,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Barra di progresso lineare -->
                 <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progress_bar"
                     android:layout_width="match_parent"
@@ -48,6 +59,7 @@
                     android:max="100"
                     android:progress="0" />
 
+                <!-- Percentuale di completamento -->
                 <TextView
                     android:id="@+id/text_progress_percent"
                     android:layout_width="wrap_content"
@@ -57,6 +69,7 @@
                     android:text="0%"
                     android:textAppearance="?attr/textAppearanceHeadlineSmall" />
 
+                <!-- Stato corrente della configurazione -->
                 <TextView
                     android:id="@+id/text_status"
                     android:layout_width="wrap_content"
@@ -70,7 +83,10 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Steps List -->
+        <!-- ========================================== -->
+        <!-- LISTA STEP DI CONFIGURAZIONE               -->
+        <!-- Mostra ogni singolo step del processo      -->
+        <!-- ========================================== -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,6 +95,7 @@
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?attr/colorPrimary" />
 
+        <!-- RecyclerView per la lista degli step -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_steps"
             android:layout_width="match_parent"
@@ -88,7 +105,10 @@
             tools:itemCount="5"
             tools:listitem="@layout/item_config_step" />
 
-        <!-- Debug Panel (Collapsible) -->
+        <!-- ========================================== -->
+        <!-- PANNELLO DEBUG (ESPANDIBILE)               -->
+        <!-- Mostra i log di comunicazione SMS per debug -->
+        <!-- ========================================== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_debug"
             android:layout_width="match_parent"
@@ -105,12 +125,14 @@
                 android:orientation="vertical"
                 android:padding="12dp">
 
+                <!-- Titolo sezione debug -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/config_debug"
                     android:textAppearance="?attr/textAppearanceLabelMedium" />
 
+                <!-- Log di comunicazione con font monospace -->
                 <TextView
                     android:id="@+id/text_debug_log"
                     android:layout_width="match_parent"
@@ -126,7 +148,10 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Buttons -->
+        <!-- ========================================== -->
+        <!-- PULSANTI AZIONE                            -->
+        <!-- Annulla e Avvia configurazione             -->
+        <!-- ========================================== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -134,6 +159,7 @@
             android:gravity="end"
             android:orientation="horizontal">
 
+            <!-- Pulsante Annulla -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_cancel"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -141,6 +167,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/action_cancel" />
 
+            <!-- Pulsante Avvia -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_start"
                 android:layout_width="wrap_content"

@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Setup Telefono dell'applicazione BHomeAlarm.
+    Questa schermata fa parte del wizard di configurazione iniziale e permette
+    all'utente di inserire il numero di telefono della centrale di allarme.
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
+    <!-- Toolbar con titolo schermata -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -14,6 +20,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/title_setup_phone" />
 
+    <!-- ========================================== -->
+    <!-- CONTENUTO SCROLLABILE                      -->
+    <!-- Form per l'inserimento del numero telefono -->
+    <!-- ========================================== -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -30,6 +40,12 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- ========================================== -->
+            <!-- SEZIONE HEADER                             -->
+            <!-- Icona e testi introduttivi                 -->
+            <!-- ========================================== -->
+
+            <!-- Icona telefono -->
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
@@ -39,6 +55,7 @@
                 android:src="@drawable/ic_phone"
                 app:tint="?attr/colorPrimary" />
 
+            <!-- Titolo della schermata -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,6 +65,7 @@
                 android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="?attr/colorOnSurface" />
 
+            <!-- Descrizione dello step -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,6 +75,10 @@
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
+            <!-- ========================================== -->
+            <!-- CAMPO INPUT NUMERO TELEFONO                -->
+            <!-- Con icona per selezione da rubrica         -->
+            <!-- ========================================== -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_phone"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -67,6 +89,7 @@
                 app:endIconDrawable="@drawable/ic_contacts"
                 app:endIconContentDescription="@string/action_pick_contact">
 
+                <!-- Campo di testo per numero telefono -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_phone"
                     android:layout_width="match_parent"
@@ -76,6 +99,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Suggerimento per l'utente -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,11 +108,18 @@
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
+            <!-- Spazio flessibile per spingere i pulsanti in basso -->
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+            <!-- ========================================== -->
+            <!-- PULSANTI AZIONE                            -->
+            <!-- Continua e Salta                           -->
+            <!-- ========================================== -->
+
+            <!-- Pulsante Continua - disabilitato finche' non si inserisce un numero valido -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_continue"
                 android:layout_width="match_parent"
@@ -97,6 +128,7 @@
                 android:enabled="false"
                 android:text="@string/action_continue" />
 
+            <!-- Pulsante Salta - permette di procedere senza configurare il numero -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_skip"
                 style="@style/Widget.Material3.Button.TextButton"

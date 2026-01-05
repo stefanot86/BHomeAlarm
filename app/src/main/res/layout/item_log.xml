@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per un singolo elemento log nella lista comunicazioni.
+    Mostra i dettagli di una comunicazione SMS con la centrale:
+    - Direzione (inviato/ricevuto)
+    - Contenuto del messaggio
+    - Timestamp
+    - Stato (successo/errore)
+-->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,6 +27,8 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
+        <!-- Icona direzione messaggio -->
+        <!-- Freccia su = inviato, Freccia giu' = ricevuto -->
         <ImageView
             android:id="@+id/icon_direction"
             android:layout_width="32dp"
@@ -27,6 +37,7 @@
             app:tint="?attr/colorPrimary"
             tools:src="@drawable/ic_arrow_downward" />
 
+        <!-- Sezione contenuto e timestamp -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -34,6 +45,7 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- Contenuto del messaggio SMS (font monospace per comandi) -->
             <TextView
                 android:id="@+id/text_log_content"
                 android:layout_width="wrap_content"
@@ -44,6 +56,7 @@
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 tools:text="CONF1:08.99&amp;MAIN.1111..." />
 
+            <!-- Data e ora del messaggio -->
             <TextView
                 android:id="@+id/text_log_time"
                 android:layout_width="wrap_content"
@@ -54,6 +67,8 @@
 
         </LinearLayout>
 
+        <!-- Icona stato comunicazione -->
+        <!-- Check verde = successo, X rossa = errore -->
         <ImageView
             android:id="@+id/icon_status"
             android:layout_width="20dp"

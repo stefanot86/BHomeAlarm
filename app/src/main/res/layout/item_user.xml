@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per un singolo elemento utente nella lista utenti.
+    Mostra le informazioni dell'utente (nome e permessi assegnati)
+    all'interno di una card cliccabile per accedere alla modifica.
+-->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,6 +24,7 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <!-- Icona avatar utente -->
         <ImageView
             android:id="@+id/icon_user"
             android:layout_width="40dp"
@@ -26,6 +32,7 @@
             android:src="@drawable/ic_person"
             app:tint="?attr/colorPrimary" />
 
+        <!-- Sezione informazioni utente -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -33,6 +40,7 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- Nome utente -->
             <TextView
                 android:id="@+id/text_user_name"
                 android:layout_width="wrap_content"
@@ -40,6 +48,13 @@
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 tools:text="Mario Rossi" />
 
+            <!-- ========================================== -->
+            <!-- GRUPPO CHIP PERMESSI                       -->
+            <!-- Mostra i permessi assegnati all'utente     -->
+            <!-- RX1, RX2: Riceve notifiche dal sistema     -->
+            <!-- VERIFY: Puo' verificare lo stato           -->
+            <!-- CMD: Puo' inviare comandi (arma/disarma)   -->
+            <!-- ========================================== -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chip_group_permissions"
                 android:layout_width="wrap_content"
@@ -48,6 +63,7 @@
                 app:chipSpacingHorizontal="4dp"
                 app:singleLine="true">
 
+                <!-- Chip permesso RX1 - Ricezione notifiche primaria -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_rx1"
                     style="@style/Widget.Material3.Chip.Assist"
@@ -58,6 +74,7 @@
                     android:visibility="gone"
                     tools:visibility="visible" />
 
+                <!-- Chip permesso RX2 - Ricezione notifiche secondaria -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_rx2"
                     style="@style/Widget.Material3.Chip.Assist"
@@ -68,6 +85,7 @@
                     android:visibility="gone"
                     tools:visibility="visible" />
 
+                <!-- Chip permesso VERIFY - Verifica stato sistema -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_verify"
                     style="@style/Widget.Material3.Chip.Assist"
@@ -77,6 +95,7 @@
                     android:textSize="10sp"
                     android:visibility="gone" />
 
+                <!-- Chip permesso CMD - Invio comandi -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_cmd"
                     style="@style/Widget.Material3.Chip.Assist"
@@ -91,6 +110,7 @@
 
         </LinearLayout>
 
+        <!-- Freccia navigazione per accedere ai dettagli -->
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"

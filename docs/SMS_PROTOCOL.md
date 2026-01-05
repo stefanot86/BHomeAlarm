@@ -194,16 +194,21 @@ ERR:codice_errore#
 
 **Request**:
 ```
-CUST:ZZZZZZZZ
+CUST:NNN
 ```
 
 | Parametro | Descrizione | Esempio |
 |-----------|-------------|---------|
-| `ZZZZZZZZ` | 8 caratteri (0/1) per ogni zona | `CUST:11110000` |
+| `NNN` | Numeri delle zone da attivare concatenati | `CUST:134` |
 
-**Esempio** (zone 1-4 attive):
+**Esempio** (zone 1, 3, 4 attive):
 ```
-CUST:11110000
+CUST:134
+```
+
+**Esempio** (tutte le 8 zone attive):
+```
+CUST:12345678
 ```
 
 **Response**:
@@ -677,7 +682,7 @@ public class SmsValidator {
 
         // Pattern per comandi parametrici
         if (command.matches("SCE:\\d{2}")) return true;
-        if (command.matches("CUST:[01]{8}")) return true;
+        if (command.matches("CUST:[1-8]+")) return true;  // Es: CUST:134
         if (command.matches("SET:U\\d{2}[01]{4}")) return true;
 
         return false;

@@ -17,11 +17,41 @@ import it.bhomealarm.R;
 import it.bhomealarm.model.entity.User;
 
 /**
- * Adapter per la lista utenti.
+ * Adapter per la visualizzazione degli utenti registrati nel sistema di allarme.
+ * <p>
+ * Questo adapter gestisce una lista di {@link User} mostrando per ciascuno il nome
+ * e i permessi assegnati sotto forma di chip. Utilizza il layout {@code item_user.xml}
+ * che presenta il nome utente e fino a quattro chip per i permessi (RX1, RX2, Verify, Cmd).
+ * </p>
+ * <p>
+ * I chip dei permessi vengono mostrati o nascosti dinamicamente in base ai permessi
+ * effettivamente assegnati all'utente:
+ * <ul>
+ *     <li><b>RX1</b>: ricezione notifiche gruppo 1</li>
+ *     <li><b>RX2</b>: ricezione notifiche gruppo 2</li>
+ *     <li><b>Verify</b>: verifica stato sistema</li>
+ *     <li><b>Cmd</b>: comandi di attivazione/disattivazione</li>
+ * </ul>
+ * </p>
+ *
+ * @see User
+ * @see OnUserClickListener
  */
 public class UsersAdapter extends ListAdapter<User, UsersAdapter.UserViewHolder> {
 
+    /**
+     * Interfaccia listener per gestire gli eventi di click sugli utenti.
+     * <p>
+     * Implementare questa interfaccia per ricevere notifiche quando l'utente
+     * tocca un elemento della lista, tipicamente per aprire la schermata di dettaglio.
+     * </p>
+     */
     public interface OnUserClickListener {
+        /**
+         * Chiamato quando un utente viene selezionato dalla lista.
+         *
+         * @param user l'utente su cui e' stato effettuato il click
+         */
         void onUserClick(User user);
     }
 
@@ -62,13 +92,33 @@ public class UsersAdapter extends ListAdapter<User, UsersAdapter.UserViewHolder>
         holder.bind(getItem(position));
     }
 
+    /**
+     * ViewHolder per la visualizzazione di un singolo elemento utente.
+     * <p>
+     * Mostra il nome dell'utente e i chip dei permessi assegnati.
+     * Supporta il click per selezionare l'utente.
+     * </p>
+     */
     class UserViewHolder extends RecyclerView.ViewHolder {
+        /** TextView per visualizzare il nome dell'utente o il placeholder "Utente X". */
         private final TextView textUserName;
+        /** Chip per indicare il permesso di ricezione notifiche gruppo 1. */
         private final Chip chipRx1;
+        /** Chip per indicare il permesso di ricezione notifiche gruppo 2. */
         private final Chip chipRx2;
+        /** Chip per indicare il permesso di verifica stato sistema. */
         private final Chip chipVerify;
+        /** Chip per indicare il permesso di comandi ON/OFF. */
         private final Chip chipCmd;
 
+        /**
+         * Costruisce un nuovo ViewHolder per l'elemento utente.
+         * <p>
+         * Configura il click listener per notificare la selezione dell'utente.
+         * </p>
+         *
+         * @param itemView la vista radice dell'elemento
+         */
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
             textUserName = itemView.findViewById(R.id.text_user_name);
@@ -85,6 +135,16 @@ public class UsersAdapter extends ListAdapter<User, UsersAdapter.UserViewHolder>
             });
         }
 
+        /**
+         * Associa i dati di un utente a questa vista.
+         * <p>
+         * Visualizza il nome dell'utente (o "Utente X" se il nome e' vuoto)
+         * e mostra/nasconde i chip dei permessi in base ai permessi effettivamente
+         * assegnati all'utente.
+         * </p>
+         *
+         * @param user l'utente da visualizzare
+         */
         void bind(User user) {
             String displayName = user.getName().isEmpty()
                     ? "Utente " + user.getSlot()

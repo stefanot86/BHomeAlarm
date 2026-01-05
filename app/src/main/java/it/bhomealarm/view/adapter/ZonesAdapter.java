@@ -20,11 +20,42 @@ import it.bhomealarm.R;
 import it.bhomealarm.model.entity.Zone;
 
 /**
- * Adapter per la lista zone con selezione multipla.
+ * Adapter per la visualizzazione e selezione multipla delle zone in una RecyclerView.
+ * <p>
+ * Questo adapter gestisce una lista di {@link Zone} permettendo all'utente di selezionare
+ * o deselezionare singole zone tramite checkbox. Utilizza il layout {@code item_zone.xml}
+ * che presenta una card con checkbox e nome della zona.
+ * </p>
+ * <p>
+ * Caratteristiche principali:
+ * <ul>
+ *     <li>Selezione multipla delle zone tramite checkbox</li>
+ *     <li>Gestione dello stato di selezione tramite Set di slot</li>
+ *     <li>Utilizzo di DiffUtil per aggiornamenti efficienti della lista</li>
+ *     <li>Callback per notificare i cambiamenti di selezione</li>
+ * </ul>
+ * </p>
+ *
+ * @see Zone
+ * @see OnZoneToggleListener
  */
 public class ZonesAdapter extends ListAdapter<Zone, ZonesAdapter.ZoneViewHolder> {
 
+    /**
+     * Interfaccia listener per gestire gli eventi di selezione/deselezione delle zone.
+     * <p>
+     * Implementare questa interfaccia per ricevere notifiche quando l'utente
+     * tocca una zona nella lista, modificandone lo stato di selezione.
+     * </p>
+     */
     public interface OnZoneToggleListener {
+        /**
+         * Chiamato quando lo stato di selezione di una zona viene modificato.
+         *
+         * @param zone     la zona il cui stato di selezione e' cambiato
+         * @param selected {@code true} se la zona e' stata selezionata,
+         *                 {@code false} se e' stata deselezionata
+         */
         void onZoneToggle(Zone zone, boolean selected);
     }
 
@@ -77,11 +108,29 @@ public class ZonesAdapter extends ListAdapter<Zone, ZonesAdapter.ZoneViewHolder>
         holder.bind(getItem(position));
     }
 
+    /**
+     * ViewHolder per la visualizzazione di un singolo elemento zona.
+     * <p>
+     * Gestisce il binding dei dati della zona e l'interazione utente per la selezione.
+     * Il click sull'intera card alterna lo stato di selezione della zona.
+     * </p>
+     */
     class ZoneViewHolder extends RecyclerView.ViewHolder {
+        /** Card contenitore dell'elemento, supporta lo stato checked per feedback visivo. */
         private final MaterialCardView cardView;
+        /** Checkbox per indicare e modificare lo stato di selezione della zona. */
         private final MaterialCheckBox checkboxZone;
+        /** TextView per visualizzare il nome della zona o il placeholder "Zona X". */
         private final TextView textZoneName;
 
+        /**
+         * Costruisce un nuovo ViewHolder per l'elemento zona.
+         * <p>
+         * Configura il click listener sull'intera vista per gestire la selezione.
+         * </p>
+         *
+         * @param itemView la vista radice dell'elemento
+         */
         ZoneViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = (MaterialCardView) itemView;
@@ -111,6 +160,16 @@ public class ZonesAdapter extends ListAdapter<Zone, ZonesAdapter.ZoneViewHolder>
             });
         }
 
+        /**
+         * Associa i dati di una zona a questa vista.
+         * <p>
+         * Visualizza il nome della zona (o "Zona X" se il nome e' vuoto)
+         * e aggiorna lo stato visivo della checkbox e della card in base
+         * allo stato di selezione corrente.
+         * </p>
+         *
+         * @param zone la zona da visualizzare
+         */
         void bind(Zone zone) {
             String displayName = zone.getName().isEmpty()
                     ? "Zona " + zone.getSlot()

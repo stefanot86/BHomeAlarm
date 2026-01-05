@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Scenari dell'applicazione BHomeAlarm.
+    Questa schermata permette di selezionare scenari predefiniti o personalizzati
+    per l'attivazione del sistema di allarme con diverse configurazioni di zone.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,10 +12,12 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.ScenariosFragment">
 
+    <!-- Sezione AppBar con toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Toolbar con pulsante indietro e titolo -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,6 +27,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Contenuto scrollabile della schermata -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +39,10 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Predefined Scenarios -->
+            <!-- ========================================== -->
+            <!-- SEZIONE SCENARI PREDEFINITI                -->
+            <!-- Lista degli scenari configurati di default -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,6 +51,7 @@
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorPrimary" />
 
+            <!-- RecyclerView per la lista degli scenari predefiniti -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_scenarios"
                 android:layout_width="match_parent"
@@ -49,7 +61,10 @@
                 tools:itemCount="4"
                 tools:listitem="@layout/item_scenario" />
 
-            <!-- Custom Scenario -->
+            <!-- ========================================== -->
+            <!-- SEZIONE SCENARIO PERSONALIZZATO            -->
+            <!-- Permette di creare una configurazione custom -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,6 +74,7 @@
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorPrimary" />
 
+            <!-- Card per accedere alla configurazione personalizzata -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_custom"
                 android:layout_width="match_parent"
@@ -76,12 +92,14 @@
                     android:orientation="horizontal"
                     android:padding="16dp">
 
+                    <!-- Icona impostazioni -->
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_settings"
                         app:tint="?attr/colorSecondary" />
 
+                    <!-- Testo descrittivo scenario personalizzato -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -103,6 +121,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"

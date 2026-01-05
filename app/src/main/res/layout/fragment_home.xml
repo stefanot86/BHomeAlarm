@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Home dell'applicazione BHomeAlarm.
+    Questa schermata principale mostra lo stato corrente del sistema di allarme
+    e fornisce i controlli rapidi per armare, disarmare e verificare lo stato.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,10 +12,12 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.HomeFragment">
 
+    <!-- Sezione AppBar con toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Toolbar principale con titolo app e menu -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,6 +27,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Contenuto scrollabile della schermata -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +39,10 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Status Card -->
+            <!-- ========================================== -->
+            <!-- CARD STATO SISTEMA                         -->
+            <!-- Mostra lo stato attuale del sistema di allarme -->
+            <!-- ========================================== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_status"
                 android:layout_width="match_parent"
@@ -47,6 +58,7 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
+                    <!-- Icona indicatore stato -->
                     <ImageView
                         android:id="@+id/icon_status"
                         android:layout_width="48dp"
@@ -55,6 +67,7 @@
                         android:contentDescription="@string/status_icon"
                         app:tint="?attr/colorOnSurface" />
 
+                    <!-- Informazioni stato -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -62,6 +75,7 @@
                         android:layout_marginStart="16dp"
                         android:orientation="vertical">
 
+                        <!-- Etichetta "Stato" -->
                         <TextView
                             android:id="@+id/text_status_label"
                             android:layout_width="wrap_content"
@@ -69,6 +83,7 @@
                             android:text="@string/status_label"
                             android:textAppearance="?attr/textAppearanceLabelMedium" />
 
+                        <!-- Valore stato corrente (Armato/Disarmato/Sconosciuto) -->
                         <TextView
                             android:id="@+id/text_status"
                             android:layout_width="wrap_content"
@@ -76,6 +91,7 @@
                             android:text="@string/status_unknown"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall" />
 
+                        <!-- Timestamp ultimo controllo -->
                         <TextView
                             android:id="@+id/text_last_check"
                             android:layout_width="wrap_content"
@@ -89,7 +105,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ARM Card -->
+            <!-- ========================================== -->
+            <!-- CARD AZIONE ARMA                           -->
+            <!-- Permette di attivare il sistema di allarme -->
+            <!-- ========================================== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_arm"
                 android:layout_width="match_parent"
@@ -108,6 +127,7 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
+                    <!-- Icona lucchetto chiuso -->
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -115,6 +135,7 @@
                         android:contentDescription="@string/arm_icon"
                         app:tint="?attr/colorPrimary" />
 
+                    <!-- Testo descrittivo azione arma -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -136,6 +157,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -147,7 +169,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- DISARM Card -->
+            <!-- ========================================== -->
+            <!-- CARD AZIONE DISARMA                        -->
+            <!-- Permette di disattivare il sistema di allarme -->
+            <!-- ========================================== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_disarm"
                 android:layout_width="match_parent"
@@ -166,6 +191,7 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
+                    <!-- Icona lucchetto aperto -->
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -173,6 +199,7 @@
                         android:contentDescription="@string/disarm_icon"
                         app:tint="?attr/colorPrimary" />
 
+                    <!-- Testo descrittivo azione disarma -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -194,6 +221,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -205,7 +233,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- STATUS Card -->
+            <!-- ========================================== -->
+            <!-- CARD VERIFICA STATO                        -->
+            <!-- Permette di richiedere lo stato attuale del sistema -->
+            <!-- ========================================== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_check_status"
                 android:layout_width="match_parent"
@@ -224,6 +255,7 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
+                    <!-- Icona informazioni -->
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -231,6 +263,7 @@
                         android:contentDescription="@string/status_icon"
                         app:tint="?attr/colorPrimary" />
 
+                    <!-- Testo descrittivo verifica stato -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -252,6 +285,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -267,7 +301,10 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Loading Indicator -->
+    <!-- ========================================== -->
+    <!-- INDICATORE DI CARICAMENTO                  -->
+    <!-- Mostra una barra di progresso durante le operazioni -->
+    <!-- ========================================== -->
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_indicator"
         android:layout_width="match_parent"

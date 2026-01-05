@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per il dialog di modifica permessi utente.
+    Permette di selezionare i permessi da assegnare a un utente
+    e opzionalmente applicare le modifiche a tutti gli utenti.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -6,6 +11,7 @@
     android:orientation="vertical"
     android:padding="24dp">
 
+    <!-- Descrizione del dialog -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,36 +19,54 @@
         android:text="@string/permissions_description"
         android:textAppearance="?attr/textAppearanceBodyMedium" />
 
+    <!-- ========================================== -->
+    <!-- SEZIONE PERMESSI                           -->
+    <!-- Checkbox per ogni tipo di permesso         -->
+    <!-- ========================================== -->
+
+    <!-- Permesso RX1: Ricezione notifiche primaria -->
+    <!-- L'utente riceve SMS per eventi primari (allarme, intrusione) -->
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check_rx1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/permission_rx1" />
 
+    <!-- Permesso RX2: Ricezione notifiche secondaria -->
+    <!-- L'utente riceve SMS per eventi secondari (batteria, guasti) -->
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check_rx2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/permission_rx2" />
 
+    <!-- Permesso VERIFY: Verifica stato -->
+    <!-- L'utente puo' richiedere lo stato del sistema via SMS -->
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check_verify"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/permission_verify" />
 
+    <!-- Permesso CMD: Invio comandi -->
+    <!-- L'utente puo' armare/disarmare il sistema via SMS -->
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check_cmd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/permission_cmd" />
 
+    <!-- Divisore visivo -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginVertical="16dp"
         android:background="?attr/dividerColor" />
 
+    <!-- ========================================== -->
+    <!-- OPZIONE APPLICA A TUTTI                    -->
+    <!-- Permette di copiare i permessi a tutti gli utenti -->
+    <!-- ========================================== -->
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check_apply_all"
         android:layout_width="match_parent"

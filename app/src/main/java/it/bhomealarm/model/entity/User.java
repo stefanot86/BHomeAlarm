@@ -6,36 +6,66 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 /**
- * Rappresenta un utente nella rubrica dell'allarme (max 16 utenti).
+ * Entità Room che rappresenta un utente nella rubrica dell'allarme.
+ * <p>
+ * Il sistema Bticino supporta fino a 16 utenti più un utente speciale "Joker".
+ * Ogni utente ha un insieme di permessi che determinano cosa può fare:
+ * <ul>
+ *     <li><b>RX1</b>: riceve SMS di notifica allarme</li>
+ *     <li><b>RX2</b>: riceve SMS di notifica stato</li>
+ *     <li><b>VERIFY</b>: può richiedere lo stato del sistema (SYS?)</li>
+ *     <li><b>CMD</b>: può attivare/disattivare l'allarme</li>
+ * </ul>
+ * <p>
+ * I dati degli utenti vengono scaricati dall'allarme tramite CONF4 e CONF5.
+ *
+ * @see it.bhomealarm.model.dao.UserDao
  */
 @Entity(tableName = "users")
 public class User {
 
-    // Permission constants
+    // ========== Costanti Permessi ==========
+
+    /** Permesso RX1: riceve notifiche di allarme/intrusione */
     public static final int PERM_RX1 = 1;
+
+    /** Permesso RX2: riceve notifiche di cambio stato */
     public static final int PERM_RX2 = 2;
+
+    /** Permesso VERIFY: può verificare lo stato del sistema */
     public static final int PERM_VERIFY = 4;
+
+    /** Permesso CMD_ON_OFF: può attivare e disattivare l'allarme */
     public static final int PERM_CMD_ON_OFF = 8;
 
+    // ========== Campi Database ==========
+
+    /** ID univoco nel database (auto-generato) */
     @PrimaryKey(autoGenerate = true)
     private long id;
 
+    /** Numero slot dell'utente (1-16 per utenti normali, 0 per Joker) */
     @ColumnInfo(name = "slot")
-    private int slot; // 1-16, 0 for joker
+    private int slot;
 
+    /** Nome dell'utente (es. "Mario", "Casa") */
     @ColumnInfo(name = "name")
     @NonNull
     private String name = "";
 
+    /** Bitmask dei permessi (usa costanti PERM_*) */
     @ColumnInfo(name = "permissions")
     private int permissions;
 
+    /** True se è l'utente speciale Joker (slot 0) */
     @ColumnInfo(name = "is_joker")
     private boolean isJoker;
 
+    /** True se l'utente è abilitato */
     @ColumnInfo(name = "enabled")
     private boolean enabled;
 
+    /** Timestamp dell'ultimo aggiornamento */
     @ColumnInfo(name = "updated_at")
     private long updatedAt;
 
@@ -62,11 +92,24 @@ public class User {
     public long getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 
-    // Helper methods
+    // ========== Metodi Helper ==========
+
+    /**
+     * Verifica se l'utente ha un permesso specifico.
+     *
+     * @param permissionBit Costante PERM_* da verificare
+     * @return true se il permesso è presente
+     */
     public boolean hasPermission(int permissionBit) {
         return (permissions & permissionBit) != 0;
     }
 
+    /**
+     * Imposta o rimuove un permesso specifico.
+     *
+     * @param permissionBit Costante PERM_* da modificare
+     * @param enabled true per abilitare, false per disabilitare
+     */
     public void setPermission(int permissionBit, boolean enabled) {
         if (enabled) {
             permissions |= permissionBit;
@@ -75,6 +118,12 @@ public class User {
         }
     }
 
+    /**
+     * Restituisce una stringa leggibile dei permessi attivi.
+     * Esempio: "RX1 RX2 CMD"
+     *
+     * @return Stringa con i nomi dei permessi separati da spazi
+     */
     public String getPermissionsString() {
         StringBuilder sb = new StringBuilder();
         if (hasPermission(PERM_RX1)) sb.append("RX1 ");

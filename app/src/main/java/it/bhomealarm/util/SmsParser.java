@@ -8,43 +8,123 @@ import it.bhomealarm.model.entity.User;
 import it.bhomealarm.model.entity.Zone;
 
 /**
- * Parser per risposte SMS dal sistema allarme.
+ * Parser per le risposte SMS ricevute dal sistema di allarme BHome.
+ * <p>
+ * Questa classe fornisce metodi statici per interpretare e convertire
+ * i messaggi SMS ricevuti dal sistema di allarme in oggetti Java utilizzabili
+ * dall'applicazione.
+ * <p>
+ * Formati SMS supportati:
+ * <ul>
+ *     <li><b>CONF1:</b> Configurazione base (versione, flags, zone)</li>
+ *     <li><b>CONF2/CONF3:</b> Scenari di attivazione (1-8 e 9-16)</li>
+ *     <li><b>CONF4/CONF5:</b> Utenti autorizzati (1-8 e 9-16)</li>
+ *     <li><b>OK:</b> Conferma operazione completata</li>
+ *     <li><b>STATUS:</b> Stato corrente del sistema</li>
+ *     <li><b>ERR:</b> Errore nell'esecuzione del comando</li>
+ *     <li><b>SYS:</b> Formato alternativo per lo stato del sistema</li>
+ * </ul>
+ * <p>
+ * I messaggi utilizzano i separatori definiti in {@link Constants}:
+ * <ul>
+ *     <li>{@code :} - separatore comando/dati</li>
+ *     <li>{@code &} - separatore campi</li>
+ *     <li>{@code =} - assegnazione valore</li>
+ *     <li>{@code .} - separatore flags</li>
+ *     <li>{@code #} - terminatore messaggio</li>
+ * </ul>
+ * <p>
+ * La classe e' dichiarata final e ha un costruttore privato per impedirne
+ * l'istanziazione (pattern utility class).
+ *
+ * @author BHomeAlarm Team
+ * @version 1.0
+ * @see Constants
  */
 public final class SmsParser {
 
+    /**
+     * Costruttore privato per impedire l'istanziazione della classe.
+     */
     private SmsParser() {} // No instantiation
 
     /**
-     * Dati estratti da CONF1.
+     * Classe contenitore per i dati estratti dalla risposta CONF1.
+     * <p>
+     * CONF1 contiene le informazioni base del sistema:
+     * <ul>
+     *     <li>Versione firmware</li>
+     *     <li>Tipo utente (MAIN o secondario)</li>
+     *     <li>Flags permessi dell'utente</li>
+     *     <li>Elenco delle 8 zone con i rispettivi nomi</li>
+     * </ul>
      */
     public static class Conf1Data {
+        /** Versione firmware del sistema (es. "1.00"). */
         public String version;
+
+        /** Indica se l'utente e' il principale (MAIN) del sistema. */
         public boolean isMain;
+
+        /** Permesso ricezione notifiche RX1 (allarme). */
         public boolean rx1;
+
+        /** Permesso ricezione notifiche RX2 (avvisi). */
         public boolean rx2;
+
+        /** Permesso ricezione conferme operazioni. */
         public boolean verify;
+
+        /** Permesso invio comandi ON/OFF. */
         public boolean cmdOnOff;
+
+        /** Lista delle zone configurate nel sistema. */
         public List<Zone> zones = new ArrayList<>();
     }
 
     /**
-     * Dati risposta generica.
+     * Classe contenitore per i dati di una risposta generica (OK, STATUS, ERR).
+     * <p>
+     * Utilizzata per rappresentare l'esito di comandi come attivazione,
+     * disattivazione e richiesta stato.
      */
     public static class ResponseData {
+        /** Indica se l'operazione ha avuto successo. */
         public boolean success;
+
+        /** Stato del sistema (ARMED, DISARMED, ALARM, TAMPER, UNKNOWN). */
         public String status;
+
+        /** Messaggio descrittivo opzionale. */
         public String message;
+
+        /** Codice errore in caso di fallimento. */
         public String errorCode;
+
+        /** Nome dello scenario attivo (se il sistema e' armato). */
         public String scenario;
+
+        /** Elenco zone attive (formato dipende dalla risposta). */
         public String zones;
     }
 
     /**
-     * Parsa risposta CONF1.
-     * Formato: CONF1:VV.VV&FLAGS.PPPP&Z1=nome1&Z2=nome2&...&Z8=nome8&
+     * Parsa una risposta CONF1 dal sistema di allarme.
+     * <p>
+     * Formato atteso: {@code CONF1:VV.VV&FLAGS.PPPP&Z1=nome1&Z2=nome2&...&Z8=nome8&}
+     * <p>
+     * Dove:
+     * <ul>
+     *     <li>VV.VV = versione firmware</li>
+     *     <li>FLAGS = tipo utente (MAIN o altro)</li>
+     *     <li>PPPP = 4 bit permessi (rx1, rx2, verify, cmdOnOff)</li>
+     *     <li>Zn=nome = nome della zona n (1-8)</li>
+     * </ul>
      *
-     * @param response Risposta SMS
-     * @return Dati parsati o null se errore
+     * @param response il messaggio SMS ricevuto dal sistema
+     * @return un oggetto {@link Conf1Data} con i dati estratti,
+     *         oppure {@code null} se il messaggio e' null, non inizia con
+     *         "CONF1:" o si verifica un errore di parsing
      */
     public static Conf1Data parseConf1(String response) {
         if (response == null || !response.startsWith(Constants.RESP_CONF1)) {
@@ -88,6 +168,15 @@ public final class SmsParser {
         return data;
     }
 
+    /**
+     * Parsa i flags e i permessi utente da un campo CONF1.
+     * <p>
+     * Formato atteso: {@code FLAGS.PPPP} dove FLAGS e' "MAIN" o altro
+     * e PPPP sono 4 caratteri '0' o '1' che rappresentano i permessi.
+     *
+     * @param field il campo da parsare
+     * @param data l'oggetto Conf1Data da popolare con i dati estratti
+     */
     private static void parseFlags(String field, Conf1Data data) {
         String[] parts = field.split("\\.");
         if (parts.length >= 1) {
@@ -101,6 +190,16 @@ public final class SmsParser {
         }
     }
 
+    /**
+     * Parsa una definizione di zona da un campo CONF1.
+     * <p>
+     * Formato atteso: {@code Zn=nome} dove n e' il numero zona (1-8)
+     * e nome e' il nome assegnato alla zona.
+     *
+     * @param field il campo da parsare (es. "Z1=Ingresso")
+     * @return un oggetto {@link Zone} configurato, oppure {@code null}
+     *         se il formato non e' valido
+     */
     private static Zone parseZone(String field) {
         // Z1=Ingresso
         if (field.length() < 4 || field.charAt(1) < '1' || field.charAt(1) > '8') {
@@ -119,11 +218,15 @@ public final class SmsParser {
     }
 
     /**
-     * Parsa risposta CONF2 o CONF3 (scenari).
-     * Formato: CONFx:Snn=nome&Snn=nome&...
+     * Parsa una risposta CONF2 o CONF3 contenente gli scenari di attivazione.
+     * <p>
+     * Formato atteso: {@code CONFx:Snn=nome&Snn=nome&...}
+     * <p>
+     * CONF2 contiene scenari 1-8, CONF3 contiene scenari 9-16.
      *
-     * @param response Risposta SMS
-     * @return Lista scenari parsati
+     * @param response il messaggio SMS ricevuto dal sistema
+     * @return una lista di oggetti {@link Scenario} estratti dal messaggio;
+     *         lista vuota se il messaggio e' null o non valido
      */
     public static List<Scenario> parseScenarios(String response) {
         List<Scenario> scenarios = new ArrayList<>();
@@ -160,11 +263,16 @@ public final class SmsParser {
     }
 
     /**
-     * Parsa risposta CONF4 o CONF5 (utenti).
-     * Formato: CONFx:Rnn=nome&...&RJO=joker
+     * Parsa una risposta CONF4 o CONF5 contenente gli utenti autorizzati.
+     * <p>
+     * Formato atteso: {@code CONFx:Rnn=nome&...&RJO=joker}
+     * <p>
+     * CONF4 contiene utenti 1-8 e l'utente Joker, CONF5 contiene utenti 9-16.
+     * L'utente Joker (prefisso "RJO") e' un utente speciale con permessi elevati.
      *
-     * @param response Risposta SMS
-     * @return Lista utenti parsati
+     * @param response il messaggio SMS ricevuto dal sistema
+     * @return una lista di oggetti {@link User} estratti dal messaggio;
+     *         lista vuota se il messaggio e' null o non valido
      */
     public static List<User> parseUsers(String response) {
         List<User> users = new ArrayList<>();
@@ -212,10 +320,21 @@ public final class SmsParser {
     }
 
     /**
-     * Parsa risposta a comandi (OK/ERR/STATUS).
+     * Parsa una risposta generica a comandi (OK, ERR, STATUS o SYS).
+     * <p>
+     * Gestisce i seguenti formati:
+     * <ul>
+     *     <li>{@code OK:ARMED:scenario} - Operazione completata, sistema armato</li>
+     *     <li>{@code OK:DISARMED} - Operazione completata, sistema disarmato</li>
+     *     <li>{@code STATUS:stato&SCE=scenario&ZONES=zone} - Stato del sistema</li>
+     *     <li>{@code ERR:codice} - Errore nell'esecuzione</li>
+     *     <li>{@code SYS: ON/OFF} - Formato alternativo stato (multilinea)</li>
+     * </ul>
      *
-     * @param response Risposta SMS
-     * @return Dati risposta parsati
+     * @param response il messaggio SMS ricevuto dal sistema
+     * @return un oggetto {@link ResponseData} con i dati estratti;
+     *         se il messaggio e' null o vuoto, restituisce un ResponseData
+     *         con success=false e errorCode=TIMEOUT
      */
     public static ResponseData parseResponse(String response) {
         ResponseData data = new ResponseData();
@@ -252,12 +371,19 @@ public final class SmsParser {
     }
 
     /**
-     * Parsa il formato reale di risposta stato:
+     * Parsa il formato reale di risposta stato multilinea.
+     * <p>
+     * Formato atteso (su piu' righe):
+     * <pre>
      * SYS: ON
      * SCE:---
-     * ZONES:cont giorno;cont notte;volumetrici;porta;zona 7
+     * ZONES:cont giorno;cont notte;volumetrici
      * 230V: KO
      * BATT: OK
+     * </pre>
+     *
+     * @param content il contenuto del messaggio da parsare
+     * @param data l'oggetto ResponseData da popolare con i dati estratti
      */
     private static void parseRealStatusFormat(String content, ResponseData data) {
         String[] lines = content.split("\n");
@@ -293,6 +419,14 @@ public final class SmsParser {
         }
     }
 
+    /**
+     * Parsa i dettagli di una risposta OK.
+     * <p>
+     * Formato atteso: {@code stato:scenario} (es. "ARMED:Casa")
+     *
+     * @param details i dettagli dopo il prefisso "OK:"
+     * @param data l'oggetto ResponseData da popolare
+     */
     private static void parseOkDetails(String details, ResponseData data) {
         // OK:ARMED:scenario_name o OK:DISARMED
         String[] parts = details.split(":");
@@ -304,6 +438,14 @@ public final class SmsParser {
         }
     }
 
+    /**
+     * Parsa i dettagli di una risposta STATUS.
+     * <p>
+     * Formato atteso: {@code stato&SCE=scenario&ZONES=zone}
+     *
+     * @param details i dettagli dopo il prefisso "STATUS:"
+     * @param data l'oggetto ResponseData da popolare
+     */
     private static void parseStatusDetails(String details, ResponseData data) {
         // STATUS:ARMED&SCE=Casa&ZONES=1234
         String[] parts = details.split("&");
@@ -324,10 +466,15 @@ public final class SmsParser {
     }
 
     /**
-     * Verifica se la risposta indica continuazione (termina con &).
+     * Verifica se una risposta SMS indica che ci sono altri messaggi in arrivo.
+     * <p>
+     * Le risposte lunghe possono essere suddivise su piu' SMS. Un messaggio
+     * che termina con il carattere '&amp;' indica che seguira' una continuazione.
      *
-     * @param response Risposta SMS
-     * @return true se ci sono altri messaggi in arrivo
+     * @param response il messaggio SMS da verificare
+     * @return {@code true} se il messaggio termina con '&amp;' (separatore campo),
+     *         indicando che ci sono altri messaggi in arrivo;
+     *         {@code false} altrimenti o se il messaggio e' null/vuoto
      */
     public static boolean hasContinuation(String response) {
         if (response == null || response.isEmpty()) {
@@ -338,10 +485,14 @@ public final class SmsParser {
     }
 
     /**
-     * Verifica se la risposta è terminata (termina con #).
+     * Verifica se una risposta SMS e' terminata correttamente.
+     * <p>
+     * Un messaggio che termina con il carattere '#' indica che la
+     * comunicazione e' completa e non seguiranno altri messaggi.
      *
-     * @param response Risposta SMS
-     * @return true se la comunicazione è terminata
+     * @param response il messaggio SMS da verificare
+     * @return {@code true} se il messaggio termina con '#' (terminatore),
+     *         {@code false} altrimenti o se il messaggio e' null/vuoto
      */
     public static boolean isTerminated(String response) {
         if (response == null || response.isEmpty()) {
@@ -352,10 +503,20 @@ public final class SmsParser {
     }
 
     /**
-     * Identifica il tipo di risposta.
+     * Identifica il tipo di risposta SMS in base al prefisso.
+     * <p>
+     * Analizza l'inizio del messaggio per determinare quale tipo di
+     * risposta e' stata ricevuta dal sistema di allarme.
      *
-     * @param response Risposta SMS
-     * @return Prefisso identificativo (CONF1, OK, STATUS, etc.) o null
+     * @param response il messaggio SMS da identificare
+     * @return una stringa identificativa del tipo di risposta:
+     *         <ul>
+     *             <li>"CONF1", "CONF2", "CONF3", "CONF4", "CONF5" - configurazioni</li>
+     *             <li>"OK" - operazione completata</li>
+     *             <li>"STATUS" - stato del sistema (include formato "SYS:")</li>
+     *             <li>"ERROR" - errore</li>
+     *             <li>{@code null} - tipo non riconosciuto o messaggio null</li>
+     *         </ul>
      */
     public static String identifyResponse(String response) {
         if (response == null) return null;
@@ -375,6 +536,15 @@ public final class SmsParser {
         return null;
     }
 
+    /**
+     * Rimuove il carattere terminatore da una stringa SMS.
+     * <p>
+     * Rimuove l'ultimo carattere se e' '#' (terminatore) o '&amp;' (separatore campo).
+     *
+     * @param content il contenuto da processare
+     * @return il contenuto senza il terminatore finale, oppure il contenuto
+     *         originale se non termina con un carattere terminatore
+     */
     private static String removeTerminator(String content) {
         if (content == null || content.isEmpty()) {
             return content;

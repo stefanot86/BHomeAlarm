@@ -25,30 +25,77 @@ import it.bhomealarm.util.Constants;
 import it.bhomealarm.util.SmsParser;
 
 /**
- * ViewModel per ConfigurationFragment.
- * Gestisce la macchina a stati per configurazione CONF1-5.
+ * ViewModel per la gestione della procedura di configurazione iniziale.
+ * <p>
+ * Questa classe implementa una macchina a stati che gestisce la sequenza di
+ * configurazione CONF1-5 per sincronizzare l'applicazione con la centralina
+ * di allarme. La procedura comprende:
+ * <ul>
+ *     <li><b>CONF1:</b> Configurazione base (versione firmware, zone)</li>
+ *     <li><b>CONF2:</b> Scenari 1-8</li>
+ *     <li><b>CONF3:</b> Scenari 9-16</li>
+ *     <li><b>CONF4:</b> Utenti 1-8</li>
+ *     <li><b>CONF5:</b> Utenti 9-16</li>
+ * </ul>
+ * <p>
+ * Il ViewModel gestisce automaticamente:
+ * <ul>
+ *     <li>L'invio sequenziale dei comandi SMS</li>
+ *     <li>La ricezione e il parsing delle risposte</li>
+ *     <li>I timeout di comunicazione</li>
+ *     <li>La persistenza dei dati ricevuti</li>
+ *     <li>L'aggiornamento dello stato della UI</li>
+ * </ul>
+ *
+ * @see it.bhomealarm.view.fragment.ConfigurationFragment
+ * @see OnConfigProgressListener
+ * @see OnSmsResultListener
+ * @see SmsParser
  */
 public class ConfigurationViewModel extends AndroidViewModel implements OnConfigProgressListener, OnSmsResultListener {
 
     /**
-     * Stato di un singolo step di configurazione.
+     * Enumerazione degli stati possibili per un singolo step di configurazione.
+     * <p>
+     * Utilizzata per tracciare il progresso di ogni fase della configurazione
+     * e visualizzare lo stato nella UI.
      */
     public enum StepStatus {
+        /** Step non ancora iniziato */
         PENDING,
+        /** Step attualmente in esecuzione */
         IN_PROGRESS,
+        /** Step completato con successo */
         COMPLETED,
+        /** Step fallito per errore */
         ERROR
     }
 
     /**
-     * Dati di uno step per UI.
+     * Classe che rappresenta i dati di un singolo step di configurazione.
+     * <p>
+     * Contiene le informazioni necessarie per visualizzare lo stato
+     * di ogni step nella UI, inclusi numero, nome, stato e messaggio.
      */
     public static class ConfigStep {
+        /** Numero progressivo dello step (1-5) */
         public final int stepNumber;
+
+        /** Nome descrittivo dello step */
         public final String name;
+
+        /** Stato corrente dello step */
         public StepStatus status;
+
+        /** Messaggio di stato o errore */
         public String message;
 
+        /**
+         * Costruttore per creare un nuovo step di configurazione.
+         *
+         * @param stepNumber Numero progressivo dello step
+         * @param name Nome descrittivo dello step
+         */
         public ConfigStep(int stepNumber, String name) {
             this.stepNumber = stepNumber;
             this.name = name;
@@ -56,29 +103,59 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         }
     }
 
+    /** Repository per l'accesso ai dati dell'allarme */
     private final AlarmRepository repository;
+
+    /** Servizio per l'invio di SMS */
     private final SmsService smsService;
+
+    /** SharedPreferences per la persistenza delle impostazioni */
     private final SharedPreferences prefs;
+
+    /** Handler per la gestione dei timeout sul main thread */
     private final Handler timeoutHandler;
 
-    // Timeout per attesa risposta SMS
+    /** Runnable per il timeout corrente */
     private Runnable timeoutRunnable;
+
+    /** ID del messaggio SMS in attesa di risposta */
     private String pendingMessageId;
 
-    // State Machine
+    /** Stato corrente della macchina a stati di configurazione */
     private int currentState = Constants.CONFIG_STATE_IDLE;
 
-    // UI State
+    // ========== UI State ==========
+
+    /** Progresso della configurazione in percentuale (0-100) */
     private final MutableLiveData<Integer> progress = new MutableLiveData<>(0);
+
+    /** Messaggio di stato corrente da visualizzare */
     private final MutableLiveData<String> statusMessage = new MutableLiveData<>();
+
+    /** Flag che indica se la configurazione e' in corso */
     private final MutableLiveData<Boolean> isRunning = new MutableLiveData<>(false);
+
+    /** Flag che indica se la configurazione e' stata completata */
     private final MutableLiveData<Boolean> isComplete = new MutableLiveData<>(false);
+
+    /** Messaggio di errore in caso di fallimento */
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+
+    /** Lista degli step di configurazione con il loro stato */
     private final MutableLiveData<List<ConfigStep>> steps = new MutableLiveData<>();
 
-    // Debug Log
+    /** Log di debug per la visualizzazione delle comunicazioni SMS */
     private final MutableLiveData<List<String>> debugLog = new MutableLiveData<>(new ArrayList<>());
 
+    /**
+     * Costruttore del ViewModel.
+     * <p>
+     * Inizializza tutti i componenti necessari per la gestione della
+     * configurazione: repository, servizio SMS, preferences e handler
+     * per i timeout.
+     *
+     * @param application Contesto dell'applicazione Android
+     */
     public ConfigurationViewModel(@NonNull Application application) {
         super(application);
         repository = AlarmRepository.getInstance(application);
@@ -88,6 +165,12 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         initializeSteps();
     }
 
+    /**
+     * Chiamato quando il ViewModel viene distrutto.
+     * <p>
+     * Annulla eventuali timeout pendenti e rimuove il listener SMS
+     * per evitare memory leak.
+     */
     @Override
     protected void onCleared() {
         super.onCleared();
@@ -98,34 +181,74 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
     // ========== Getters ==========
 
+    /**
+     * Restituisce il LiveData contenente il progresso della configurazione.
+     *
+     * @return LiveData con il valore percentuale del progresso (0-100)
+     */
     public LiveData<Integer> getProgress() {
         return progress;
     }
 
+    /**
+     * Restituisce il LiveData contenente il messaggio di stato.
+     *
+     * @return LiveData con il messaggio di stato corrente
+     */
     public LiveData<String> getStatusMessage() {
         return statusMessage;
     }
 
+    /**
+     * Restituisce il LiveData che indica se la configurazione e' in corso.
+     *
+     * @return LiveData con true se la configurazione e' attiva, false altrimenti
+     */
     public LiveData<Boolean> getIsRunning() {
         return isRunning;
     }
 
+    /**
+     * Restituisce il LiveData che indica se la configurazione e' completata.
+     *
+     * @return LiveData con true se la configurazione e' terminata con successo
+     */
     public LiveData<Boolean> getIsComplete() {
         return isComplete;
     }
 
+    /**
+     * Restituisce il LiveData contenente eventuali messaggi di errore.
+     *
+     * @return LiveData con il messaggio di errore, o null se non ci sono errori
+     */
     public LiveData<String> getErrorMessage() {
         return errorMessage;
     }
 
+    /**
+     * Restituisce il LiveData contenente la lista degli step di configurazione.
+     *
+     * @return LiveData con la lista di ConfigStep rappresentanti ogni fase
+     */
     public LiveData<List<ConfigStep>> getSteps() {
         return steps;
     }
 
+    /**
+     * Restituisce il LiveData contenente il log di debug.
+     *
+     * @return LiveData con la lista di stringhe del log di debug
+     */
     public LiveData<List<String>> getDebugLog() {
         return debugLog;
     }
 
+    /**
+     * Restituisce lo stato corrente della macchina a stati.
+     *
+     * @return Valore intero rappresentante lo stato corrente (vedi Constants.CONFIG_STATE_*)
+     */
     public int getCurrentState() {
         return currentState;
     }
@@ -133,7 +256,10 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     // ========== Actions ==========
 
     /**
-     * Inizializza la lista degli step.
+     * Inizializza la lista degli step di configurazione.
+     * <p>
+     * Crea i 5 step corrispondenti ai comandi CONF1-5 con i relativi
+     * nomi descrittivi.
      */
     private void initializeSteps() {
         List<ConfigStep> stepList = new ArrayList<>();
@@ -146,7 +272,12 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     /**
-     * Avvia la configurazione.
+     * Avvia la procedura di configurazione.
+     * <p>
+     * Verifica che il numero di allarme sia configurato, inizializza
+     * lo stato e avvia il primo step (CONF1).
+     * <p>
+     * Se la configurazione e' gia' in corso, il metodo non fa nulla.
      */
     public void startConfiguration() {
         if (Boolean.TRUE.equals(isRunning.getValue())) {
@@ -174,7 +305,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     /**
-     * Invia un comando di configurazione.
+     * Invia un comando di configurazione alla centralina.
+     * <p>
+     * Aggiorna lo stato dello step, invia il comando SMS e avvia
+     * il timer di timeout per la risposta.
+     *
+     * @param command Comando SMS da inviare
+     * @param stepNumber Numero dello step corrente (1-5)
      */
     private void sendConfigCommand(String command, int stepNumber) {
         String phone = getAlarmPhoneNumber();
@@ -196,9 +333,12 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     /**
-     * Processa una risposta SMS ricevuta.
+     * Processa una risposta SMS ricevuta dalla centralina.
+     * <p>
+     * Annulla il timeout, salva il log nel database e delega il parsing
+     * al metodo appropriato in base allo stato corrente della macchina a stati.
      *
-     * @param response Corpo del messaggio SMS
+     * @param response Corpo del messaggio SMS ricevuto
      */
     public void processResponse(String response) {
         cancelTimeout();
@@ -247,6 +387,14 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         }
     }
 
+    /**
+     * Processa la risposta CONF1 (configurazione base).
+     * <p>
+     * Estrae e salva la versione firmware e le zone configurate,
+     * poi avanza allo step CONF2.
+     *
+     * @param response Risposta SMS CONF1 da parsare
+     */
     private void processConf1(String response) {
         SmsParser.Conf1Data data = SmsParser.parseConf1(response);
         if (data == null) {
@@ -266,6 +414,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         sendConfigCommand(Constants.CMD_CONF2, 2);
     }
 
+    /**
+     * Processa la risposta CONF2 (scenari 1-8).
+     * <p>
+     * Estrae e salva gli scenari, poi avanza allo step CONF3.
+     *
+     * @param response Risposta SMS CONF2 da parsare
+     */
     private void processConf2(String response) {
         List<Scenario> scenarios = SmsParser.parseScenarios(response);
         repository.saveScenarios(scenarios);
@@ -278,6 +433,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         sendConfigCommand(Constants.CMD_CONF3, 3);
     }
 
+    /**
+     * Processa la risposta CONF3 (scenari 9-16).
+     * <p>
+     * Estrae e salva gli scenari, poi avanza allo step CONF4.
+     *
+     * @param response Risposta SMS CONF3 da parsare
+     */
     private void processConf3(String response) {
         List<Scenario> scenarios = SmsParser.parseScenarios(response);
         repository.saveScenarios(scenarios);
@@ -290,6 +452,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         sendConfigCommand(Constants.CMD_CONF4, 4);
     }
 
+    /**
+     * Processa la risposta CONF4 (utenti 1-8).
+     * <p>
+     * Estrae e salva gli utenti, poi avanza allo step CONF5.
+     *
+     * @param response Risposta SMS CONF4 da parsare
+     */
     private void processConf4(String response) {
         List<User> users = SmsParser.parseUsers(response);
         repository.saveUsers(users);
@@ -302,6 +471,14 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         sendConfigCommand(Constants.CMD_CONF5, 5);
     }
 
+    /**
+     * Processa la risposta CONF5 (utenti 9-16).
+     * <p>
+     * Estrae e salva gli utenti, completa la configurazione e
+     * salva lo stato nelle preferences.
+     *
+     * @param response Risposta SMS CONF5 da parsare
+     */
     private void processConf5(String response) {
         List<User> users = SmsParser.parseUsers(response);
         repository.saveUsers(users);
@@ -323,6 +500,9 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
     /**
      * Annulla la configurazione in corso.
+     * <p>
+     * Ferma il timeout, resetta lo stato della macchina e aggiorna la UI.
+     * Non ha effetto se la configurazione non e' in corso.
      */
     public void cancelConfiguration() {
         if (!Boolean.TRUE.equals(isRunning.getValue())) {
@@ -337,9 +517,12 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     /**
-     * Gestisce errore durante configurazione.
+     * Gestisce un errore durante la configurazione.
+     * <p>
+     * Annulla il timeout, aggiorna lo stato dello step corrente come ERROR
+     * e ferma la macchina a stati.
      *
-     * @param error Messaggio errore
+     * @param error Messaggio di errore da visualizzare
      */
     public void handleError(String error) {
         cancelTimeout();
@@ -358,12 +541,25 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
     }
 
     /**
-     * Gestisce timeout risposta.
+     * Gestisce il timeout di attesa risposta.
+     * <p>
+     * Chiamato quando non si riceve risposta dalla centralina entro
+     * il tempo limite configurato.
      */
     public void handleTimeout() {
         handleError("Timeout: nessuna risposta ricevuta");
     }
 
+    /**
+     * Aggiorna lo stato di uno step di configurazione.
+     * <p>
+     * Modifica lo stato e il messaggio dello step specificato e forza
+     * l'aggiornamento del LiveData per notificare la UI.
+     *
+     * @param stepNumber Numero dello step da aggiornare (1-5)
+     * @param status Nuovo stato dello step
+     * @param message Messaggio da associare allo step
+     */
     private void updateStepStatus(int stepNumber, StepStatus status, String message) {
         List<ConfigStep> currentSteps = steps.getValue();
         if (currentSteps != null && stepNumber > 0 && stepNumber <= currentSteps.size()) {
@@ -376,6 +572,12 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         }
     }
 
+    /**
+     * Converte lo stato della macchina a stati nel numero dello step corrispondente.
+     *
+     * @param state Stato della macchina a stati (Constants.CONFIG_STATE_*)
+     * @return Numero dello step (1-5) o 0 se lo stato non corrisponde a nessuno step
+     */
     private int getStepNumberFromState(int state) {
         switch (state) {
             case Constants.CONFIG_STATE_CONF1:
@@ -393,6 +595,14 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         }
     }
 
+    /**
+     * Aggiunge un messaggio al log di debug.
+     * <p>
+     * Il messaggio viene preceduto da un timestamp nel formato HH:mm:ss
+     * per facilitare il debugging delle comunicazioni.
+     *
+     * @param message Messaggio da aggiungere al log
+     */
     private void addDebugLog(String message) {
         List<String> log = debugLog.getValue();
         if (log == null) {
@@ -404,11 +614,22 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         debugLog.setValue(new ArrayList<>(log)); // Forza update
     }
 
+    /**
+     * Recupera il numero telefonico dell'allarme dalle preferences.
+     *
+     * @return Numero telefonico configurato, o null se vuoto o non configurato
+     */
     private String getAlarmPhoneNumber() {
         String phone = prefs.getString(Constants.PREF_ALARM_PHONE, "");
         return phone.isEmpty() ? null : phone;
     }
 
+    /**
+     * Avvia il timer di timeout per la risposta SMS.
+     * <p>
+     * Il timeout e' impostato a 60 secondi per permettere alla centralina
+     * tempo sufficiente per elaborare e rispondere.
+     */
     private void startTimeout() {
         cancelTimeout();
         timeoutRunnable = () -> {
@@ -420,6 +641,11 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         timeoutHandler.postDelayed(timeoutRunnable, 60000);
     }
 
+    /**
+     * Annulla il timer di timeout corrente.
+     * <p>
+     * Chiamato quando si riceve una risposta o si annulla la configurazione.
+     */
     private void cancelTimeout() {
         if (timeoutRunnable != null) {
             timeoutHandler.removeCallbacks(timeoutRunnable);
@@ -429,6 +655,14 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
     // ========== OnSmsResultListener ==========
 
+    /**
+     * Callback chiamato quando un SMS e' stato inviato con successo.
+     * <p>
+     * Aggiorna lo stato dello step corrente per indicare che si e' in
+     * attesa della risposta.
+     *
+     * @param messageId ID del messaggio inviato
+     */
     @Override
     public void onSmsSent(String messageId) {
         // SMS inviato, aspettiamo risposta
@@ -438,22 +672,46 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         }
     }
 
+    /**
+     * Callback chiamato quando un SMS e' stato consegnato al destinatario.
+     * <p>
+     * Non richiede azioni specifiche, si continua ad attendere la risposta.
+     *
+     * @param messageId ID del messaggio consegnato
+     */
     @Override
     public void onSmsDelivered(String messageId) {
         // SMS consegnato, continuiamo ad aspettare risposta
     }
 
+    /**
+     * Callback chiamato quando si riceve un SMS dalla centralina.
+     * <p>
+     * Delega l'elaborazione al metodo processResponse.
+     *
+     * @param sender Numero del mittente
+     * @param body Corpo del messaggio ricevuto
+     */
     @Override
     public void onSmsReceived(String sender, String body) {
         // Processa la risposta
         processResponse(body);
     }
 
+    /**
+     * Callback chiamato in caso di errore nell'invio SMS.
+     *
+     * @param errorCode Codice numerico dell'errore
+     * @param errorMsg Messaggio descrittivo dell'errore
+     */
     @Override
     public void onSmsError(int errorCode, String errorMsg) {
         handleError(errorMsg);
     }
 
+    /**
+     * Callback chiamato quando scade il timeout di attesa risposta.
+     */
     @Override
     public void onSmsTimeout() {
         handleTimeout();
@@ -461,11 +719,23 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
 
     // ========== OnConfigProgressListener ==========
 
+    /**
+     * Callback chiamato quando viene avviata la configurazione.
+     * <p>
+     * Avvia la procedura di configurazione interna.
+     */
     @Override
     public void onConfigStarted() {
         startConfiguration();
     }
 
+    /**
+     * Callback chiamato per aggiornare il progresso della configurazione.
+     *
+     * @param currentStep Step corrente
+     * @param totalSteps Numero totale di step
+     * @param message Messaggio di stato
+     */
     @Override
     public void onProgressUpdate(int currentStep, int totalSteps, String message) {
         int progressPercent = (currentStep * 100) / totalSteps;
@@ -473,11 +743,19 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         statusMessage.setValue(message);
     }
 
+    /**
+     * Callback chiamato quando uno step e' completato.
+     *
+     * @param step Numero dello step completato
+     */
     @Override
     public void onStepCompleted(int step) {
         updateStepStatus(step, StepStatus.COMPLETED, "Completato");
     }
 
+    /**
+     * Callback chiamato quando la configurazione e' completata.
+     */
     @Override
     public void onConfigComplete() {
         currentState = Constants.CONFIG_STATE_COMPLETE;
@@ -486,6 +764,13 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         progress.setValue(100);
     }
 
+    /**
+     * Callback chiamato in caso di errore durante la configurazione.
+     *
+     * @param step Step in cui si e' verificato l'errore
+     * @param errorCode Codice dell'errore
+     * @param errorMessage Messaggio descrittivo dell'errore
+     */
     @Override
     public void onConfigError(int step, String errorCode, String errorMessage) {
         this.errorMessage.setValue(errorMessage);
@@ -494,6 +779,9 @@ public class ConfigurationViewModel extends AndroidViewModel implements OnConfig
         isRunning.setValue(false);
     }
 
+    /**
+     * Callback chiamato quando la configurazione viene annullata.
+     */
     @Override
     public void onConfigCancelled() {
         cancelConfiguration();

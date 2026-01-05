@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Utenti dell'applicazione BHomeAlarm.
+    Questa schermata mostra la lista degli utenti configurati nel sistema di allarme,
+    permettendo di visualizzare e gestire i permessi di ciascun utente.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,10 +12,12 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.UsersFragment">
 
+    <!-- Sezione AppBar con toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Toolbar con pulsante indietro e titolo -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,6 +27,10 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- ========================================== -->
+    <!-- LISTA UTENTI                               -->
+    <!-- RecyclerView con gli utenti configurati    -->
+    <!-- ========================================== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_users"
         android:layout_width="match_parent"
@@ -31,7 +42,10 @@
         tools:itemCount="8"
         tools:listitem="@layout/item_user" />
 
-    <!-- Empty State -->
+    <!-- ========================================== -->
+    <!-- STATO VUOTO                                -->
+    <!-- Mostrato quando non ci sono utenti configurati -->
+    <!-- ========================================== -->
     <LinearLayout
         android:id="@+id/layout_empty"
         android:layout_width="match_parent"
@@ -42,6 +56,7 @@
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Icona grande per stato vuoto -->
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
@@ -49,6 +64,7 @@
             android:src="@drawable/ic_people"
             app:tint="?attr/colorOnSurfaceVariant" />
 
+        <!-- Messaggio principale stato vuoto -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -57,6 +73,7 @@
             android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textColor="?attr/colorOnSurfaceVariant" />
 
+        <!-- Descrizione aggiuntiva stato vuoto -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

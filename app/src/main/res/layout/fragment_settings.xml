@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Impostazioni dell'applicazione BHomeAlarm.
+    Questa schermata fornisce accesso a tutte le configurazioni dell'app:
+    - Configurazione del numero di telefono dell'allarme
+    - Gestione utenti autorizzati
+    - Scenari di attivazione
+    - Selezione SIM per l'invio SMS
+    - Informazioni sull'app
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,10 +16,12 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.SettingsFragment">
 
+    <!-- Sezione AppBar con toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Toolbar con pulsante indietro e titolo -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,6 +31,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Contenuto scrollabile della schermata -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +43,10 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Section: Configuration -->
+            <!-- ========================================== -->
+            <!-- SEZIONE CONFIGURAZIONE                     -->
+            <!-- Impostazioni relative alla centrale di allarme -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Alarm Phone Number -->
+                    <!-- Voce: Numero di telefono dell'allarme -->
                     <LinearLayout
                         android:id="@+id/item_phone_number"
                         android:layout_width="match_parent"
@@ -63,6 +78,7 @@
                         android:orientation="horizontal"
                         android:padding="16dp">
 
+                        <!-- Icona telefono -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -70,6 +86,7 @@
                             android:src="@drawable/ic_phone"
                             app:tint="?attr/colorOnSurfaceVariant" />
 
+                        <!-- Testo numero configurato -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -83,6 +100,7 @@
                                 android:text="@string/setting_phone_number"
                                 android:textAppearance="?attr/textAppearanceBodyLarge" />
 
+                            <!-- Mostra il numero configurato o "Non configurato" -->
                             <TextView
                                 android:id="@+id/text_phone_number"
                                 android:layout_width="wrap_content"
@@ -92,6 +110,7 @@
 
                         </LinearLayout>
 
+                        <!-- Freccia navigazione -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -101,13 +120,14 @@
 
                     </LinearLayout>
 
+                    <!-- Divisore tra le voci -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginStart="56dp"
                         android:background="?attr/dividerColor" />
 
-                    <!-- Configure System -->
+                    <!-- Voce: Configura sistema -->
                     <LinearLayout
                         android:id="@+id/item_configure"
                         android:layout_width="match_parent"
@@ -118,6 +138,7 @@
                         android:orientation="horizontal"
                         android:padding="16dp">
 
+                        <!-- Icona sincronizzazione -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -125,6 +146,7 @@
                             android:src="@drawable/ic_sync"
                             app:tint="?attr/colorOnSurfaceVariant" />
 
+                        <!-- Testo configurazione -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -146,6 +168,7 @@
 
                         </LinearLayout>
 
+                        <!-- Freccia navigazione -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -159,7 +182,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Management -->
+            <!-- ========================================== -->
+            <!-- SEZIONE GESTIONE                           -->
+            <!-- Gestione utenti e scenari                  -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -180,7 +206,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Users -->
+                    <!-- Voce: Gestione utenti -->
                     <LinearLayout
                         android:id="@+id/item_users"
                         android:layout_width="match_parent"
@@ -191,6 +217,7 @@
                         android:orientation="horizontal"
                         android:padding="16dp">
 
+                        <!-- Icona persone -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -198,6 +225,7 @@
                             android:src="@drawable/ic_people"
                             app:tint="?attr/colorOnSurfaceVariant" />
 
+                        <!-- Testo utenti -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -219,6 +247,7 @@
 
                         </LinearLayout>
 
+                        <!-- Freccia navigazione -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -228,13 +257,14 @@
 
                     </LinearLayout>
 
+                    <!-- Divisore tra le voci -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginStart="56dp"
                         android:background="?attr/dividerColor" />
 
-                    <!-- Scenarios -->
+                    <!-- Voce: Scenari di attivazione -->
                     <LinearLayout
                         android:id="@+id/item_scenarios"
                         android:layout_width="match_parent"
@@ -245,6 +275,7 @@
                         android:orientation="horizontal"
                         android:padding="16dp">
 
+                        <!-- Icona lista -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -252,6 +283,7 @@
                             android:src="@drawable/ic_list"
                             app:tint="?attr/colorOnSurfaceVariant" />
 
+                        <!-- Testo scenari con contatore -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -265,6 +297,7 @@
                                 android:text="@string/setting_scenarios"
                                 android:textAppearance="?attr/textAppearanceBodyLarge" />
 
+                            <!-- Mostra il numero di scenari configurati -->
                             <TextView
                                 android:id="@+id/text_scenarios_count"
                                 android:layout_width="wrap_content"
@@ -274,6 +307,7 @@
 
                         </LinearLayout>
 
+                        <!-- Freccia navigazione -->
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
@@ -287,7 +321,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: SIM Selection -->
+            <!-- ========================================== -->
+            <!-- SEZIONE SELEZIONE SIM                      -->
+            <!-- Permette di scegliere quale SIM usare per SMS -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -303,6 +340,7 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp">
 
+                <!-- Voce: Selezione SIM -->
                 <LinearLayout
                     android:id="@+id/item_sim"
                     android:layout_width="match_parent"
@@ -313,6 +351,7 @@
                     android:orientation="horizontal"
                     android:padding="16dp">
 
+                    <!-- Icona SIM -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -320,6 +359,7 @@
                         android:src="@drawable/ic_sim"
                         app:tint="?attr/colorOnSurfaceVariant" />
 
+                    <!-- Testo SIM selezionata -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -333,6 +373,7 @@
                             android:text="@string/setting_sim"
                             android:textAppearance="?attr/textAppearanceBodyLarge" />
 
+                        <!-- Mostra la SIM attualmente selezionata -->
                         <TextView
                             android:id="@+id/text_sim"
                             android:layout_width="wrap_content"
@@ -342,6 +383,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -353,7 +395,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Info -->
+            <!-- ========================================== -->
+            <!-- SEZIONE INFORMAZIONI                       -->
+            <!-- Informazioni sull'applicazione             -->
+            <!-- ========================================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -369,6 +414,7 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp">
 
+                <!-- Voce: Informazioni app -->
                 <LinearLayout
                     android:id="@+id/item_info"
                     android:layout_width="match_parent"
@@ -379,6 +425,7 @@
                     android:orientation="horizontal"
                     android:padding="16dp">
 
+                    <!-- Icona informazioni -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -386,6 +433,7 @@
                         android:src="@drawable/ic_info"
                         app:tint="?attr/colorOnSurfaceVariant" />
 
+                    <!-- Testo versione app -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -399,6 +447,7 @@
                             android:text="@string/setting_info"
                             android:textAppearance="?attr/textAppearanceBodyLarge" />
 
+                        <!-- Mostra la versione dell'applicazione -->
                         <TextView
                             android:id="@+id/text_version"
                             android:layout_width="wrap_content"
@@ -408,6 +457,7 @@
 
                     </LinearLayout>
 
+                    <!-- Freccia navigazione -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"

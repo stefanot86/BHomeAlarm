@@ -34,24 +34,65 @@ import it.bhomealarm.util.Constants;
 import it.bhomealarm.util.PhoneNumberUtils;
 
 /**
- * Fragment per configurazione numero telefono allarme.
- * Permette inserimento manuale o selezione da rubrica.
+ * Fragment per la configurazione del numero di telefono della centralina allarme.
+ * <p>
+ * Questo fragment permette all'utente di inserire il numero di telefono
+ * della centralina allarme, che verra' utilizzato per l'invio e la ricezione
+ * degli SMS di controllo.
+ * <p>
+ * L'inserimento del numero puo' avvenire in due modi:
+ * <ul>
+ *     <li>Digitazione manuale del numero</li>
+ *     <li>Selezione da rubrica contatti (richiede permesso READ_CONTACTS)</li>
+ * </ul>
+ * <p>
+ * Il flusso utente prevede:
+ * <ol>
+ *     <li>L'utente inserisce il numero manualmente o lo seleziona dalla rubrica</li>
+ *     <li>Il numero viene validato in tempo reale</li>
+ *     <li>Se valido, il pulsante CONTINUA si abilita</li>
+ *     <li>Toccando CONTINUA, il numero viene normalizzato, salvato e si naviga a {@link HomeFragment}</li>
+ *     <li>L'utente puo' anche saltare questo passaggio toccando SALTA</li>
+ * </ol>
+ * <p>
+ * La validazione verifica che il numero sia in un formato telefonico valido
+ * e lo normalizza rimuovendo spazi e caratteri non necessari.
+ *
+ * @see HomeFragment Fragment di destinazione dopo la configurazione
+ * @see DisclaimerFragment Fragment precedente nel flusso di setup
+ * @see PhoneNumberUtils Classe utility per la validazione e normalizzazione dei numeri
  */
 public class SetupPhoneFragment extends Fragment {
 
+    /** SharedPreferences per salvare il numero telefono configurato */
     private SharedPreferences prefs;
 
-    // Views
+    /** Toolbar della schermata (senza navigazione indietro) */
     private MaterialToolbar toolbar;
+
+    /** Layout del campo di input con supporto per icona rubrica */
     private TextInputLayout inputLayoutPhone;
+
+    /** Campo di input per il numero di telefono */
     private TextInputEditText editPhone;
+
+    /** Pulsante per salvare e procedere alla home */
     private MaterialButton buttonContinue;
+
+    /** Pulsante per saltare la configurazione del numero */
     private MaterialButton buttonSkip;
 
-    // Activity Result Launchers
+    /** Launcher per l'Activity di selezione contatto dalla rubrica */
     private ActivityResultLauncher<Intent> contactPickerLauncher;
+
+    /** Launcher per la richiesta del permesso READ_CONTACTS */
     private ActivityResultLauncher<String> permissionLauncher;
 
+    /**
+     * Inizializza le SharedPreferences e i launcher per i risultati delle Activity.
+     *
+     * @param savedInstanceState stato salvato dell'istanza precedente, puo' essere null
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +100,10 @@ public class SetupPhoneFragment extends Fragment {
         setupActivityResultLaunchers();
     }
 
+    /**
+     * Configura i launcher per la selezione contatto e la richiesta permessi.
+     * Devono essere registrati prima che il fragment sia in stato STARTED.
+     */
     private void setupActivityResultLaunchers() {
         // Launcher per selezionare contatto
         contactPickerLauncher = registerForActivityResult(
@@ -83,6 +128,14 @@ public class SetupPhoneFragment extends Fragment {
         );
     }
 
+    /**
+     * Crea e restituisce la view hierarchy associata al fragment.
+     *
+     * @param inflater inflater per creare la view dal layout XML
+     * @param container contenitore padre della view
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     * @return la view root del fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -90,6 +143,13 @@ public class SetupPhoneFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_setup_phone, container, false);
     }
 
+    /**
+     * Chiamato dopo che la view e' stata creata.
+     * Inizializza le views, configura i listener e il text watcher.
+     *
+     * @param view la view root del fragment
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -98,6 +158,12 @@ public class SetupPhoneFragment extends Fragment {
         setupTextWatcher();
     }
 
+    /**
+     * Inizializza i riferimenti alle views del layout.
+     * Disabilita il pulsante CONTINUA e pre-compila il numero se esistente.
+     *
+     * @param view la view root del fragment
+     */
     private void setupViews(View view) {
         toolbar = view.findViewById(R.id.toolbar);
         inputLayoutPhone = view.findViewById(R.id.input_layout_phone);
@@ -114,6 +180,14 @@ public class SetupPhoneFragment extends Fragment {
         }
     }
 
+    /**
+     * Configura i listener per l'icona rubrica e i pulsanti.
+     * <ul>
+     *     <li>Icona rubrica: apre il picker contatti</li>
+     *     <li>Pulsante CONTINUA: salva il numero e naviga alla home</li>
+     *     <li>Pulsante SALTA: naviga alla home senza salvare</li>
+     * </ul>
+     */
     private void setupClickListeners() {
         // Click su icona rubrica
         inputLayoutPhone.setEndIconOnClickListener(v -> checkContactsPermissionAndPick());
@@ -123,6 +197,9 @@ public class SetupPhoneFragment extends Fragment {
         buttonSkip.setOnClickListener(v -> skipAndContinue());
     }
 
+    /**
+     * Configura il TextWatcher per la validazione in tempo reale del numero telefono.
+     */
     private void setupTextWatcher() {
         editPhone.addTextChangedListener(new TextWatcher() {
             @Override
@@ -138,6 +215,12 @@ public class SetupPhoneFragment extends Fragment {
         });
     }
 
+    /**
+     * Valida il numero di telefono inserito e aggiorna l'UI di conseguenza.
+     * Abilita il pulsante CONTINUA solo se il numero e' valido.
+     *
+     * @param phone il numero di telefono da validare
+     */
     private void validatePhoneNumber(String phone) {
         if (phone.isEmpty()) {
             inputLayoutPhone.setError(null);
@@ -154,6 +237,10 @@ public class SetupPhoneFragment extends Fragment {
         }
     }
 
+    /**
+     * Verifica il permesso READ_CONTACTS e apre il picker contatti.
+     * Se il permesso non e' concesso, lo richiede all'utente.
+     */
     private void checkContactsPermissionAndPick() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -163,12 +250,21 @@ public class SetupPhoneFragment extends Fragment {
         }
     }
 
+    /**
+     * Apre l'Activity di sistema per la selezione di un contatto dalla rubrica.
+     */
     private void openContactPicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         contactPickerLauncher.launch(intent);
     }
 
+    /**
+     * Gestisce il risultato della selezione di un contatto.
+     * Estrae il numero di telefono dal contatto selezionato e lo normalizza.
+     *
+     * @param data l'Intent contenente l'URI del contatto selezionato
+     */
     private void handleContactPicked(Intent data) {
         Uri contactUri = data.getData();
         if (contactUri == null) return;
@@ -190,6 +286,10 @@ public class SetupPhoneFragment extends Fragment {
         }
     }
 
+    /**
+     * Valida, normalizza e salva il numero di telefono nelle SharedPreferences.
+     * Se valido, naviga alla schermata home.
+     */
     private void saveAndContinue() {
         String phone = editPhone.getText() != null ? editPhone.getText().toString().trim() : "";
 
@@ -209,6 +309,10 @@ public class SetupPhoneFragment extends Fragment {
                 .navigate(R.id.action_setup_phone_to_home);
     }
 
+    /**
+     * Salta la configurazione del numero e naviga direttamente alla home.
+     * L'utente potra' configurare il numero successivamente dalle impostazioni.
+     */
     private void skipAndContinue() {
         // Naviga a Home senza salvare numero
         Navigation.findNavController(requireView())

@@ -25,29 +25,78 @@ import it.bhomealarm.controller.viewmodel.HomeViewModel;
 import it.bhomealarm.util.Constants;
 
 /**
- * Fragment principale - Controllo allarme (ARM/DISARM/STATUS).
+ * Fragment principale dell'applicazione per il controllo dell'allarme.
+ * <p>
+ * Questo fragment rappresenta la schermata home e permette all'utente di:
+ * <ul>
+ *     <li>Visualizzare lo stato corrente dell'allarme (armato, disarmato, allarme, manomissione)</li>
+ *     <li>Attivare l'allarme selezionando uno scenario</li>
+ *     <li>Disattivare l'allarme con conferma</li>
+ *     <li>Verificare lo stato dell'allarme inviando un SMS</li>
+ * </ul>
+ * <p>
+ * Il flusso utente prevede:
+ * <ol>
+ *     <li>L'utente visualizza lo stato corrente dell'allarme</li>
+ *     <li>Puo' attivare l'allarme toccando la card ARM (naviga alla selezione scenari)</li>
+ *     <li>Puo' disattivare l'allarme toccando la card DISARM (con dialog di conferma)</li>
+ *     <li>Puo' verificare lo stato toccando la card CHECK STATUS</li>
+ *     <li>Puo' accedere alle impostazioni dalla toolbar</li>
+ * </ol>
+ *
+ * @see HomeViewModel ViewModel che gestisce la logica di business e lo stato dell'allarme
  */
 public class HomeFragment extends Fragment {
 
+    /** ViewModel per la gestione dello stato e delle operazioni sull'allarme */
     private HomeViewModel viewModel;
 
-    // Views
+    /** Toolbar principale con accesso alle impostazioni */
     private MaterialToolbar toolbar;
+
+    /** Card che mostra lo stato corrente dell'allarme */
     private MaterialCardView cardStatus;
+
+    /** Card per attivare l'allarme (naviga alla selezione scenari) */
     private MaterialCardView cardArm;
+
+    /** Card per disattivare l'allarme */
     private MaterialCardView cardDisarm;
+
+    /** Card per verificare lo stato dell'allarme via SMS */
     private MaterialCardView cardCheckStatus;
+
+    /** Icona che rappresenta visivamente lo stato dell'allarme */
     private ImageView iconStatus;
+
+    /** Testo che descrive lo stato corrente dell'allarme */
     private TextView textStatus;
+
+    /** Testo che mostra data/ora dell'ultimo controllo stato */
     private TextView textLastCheck;
+
+    /** Indicatore di progresso per operazioni in corso */
     private LinearProgressIndicator progressIndicator;
 
+    /**
+     * Inizializza il ViewModel all'avvio del Fragment.
+     *
+     * @param savedInstanceState stato salvato dell'istanza precedente, puo' essere null
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
     }
 
+    /**
+     * Crea e restituisce la view hierarchy associata al fragment.
+     *
+     * @param inflater inflater per creare la view dal layout XML
+     * @param container contenitore padre della view
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     * @return la view root del fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -55,6 +104,13 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    /**
+     * Chiamato dopo che la view e' stata creata.
+     * Inizializza le views, configura i listener e avvia l'osservazione dei dati.
+     *
+     * @param view la view root del fragment
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -63,6 +119,10 @@ public class HomeFragment extends Fragment {
         observeData();
     }
 
+    /**
+     * Chiamato quando il fragment torna in primo piano.
+     * Ricarica lo stato dell'allarme per gestire eventuali SMS ricevuti in background.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -70,6 +130,11 @@ public class HomeFragment extends Fragment {
         viewModel.refreshStatus();
     }
 
+    /**
+     * Inizializza i riferimenti alle views del layout e configura la toolbar.
+     *
+     * @param view la view root del fragment
+     */
     private void setupViews(View view) {
         toolbar = view.findViewById(R.id.toolbar);
         cardStatus = view.findViewById(R.id.card_status);
@@ -91,6 +156,14 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Configura i listener per le interazioni utente sulle card.
+     * <ul>
+     *     <li>Card ARM: naviga alla selezione scenari</li>
+     *     <li>Card DISARM: mostra dialog di conferma disattivazione</li>
+     *     <li>Card CHECK STATUS: richiede verifica stato via SMS</li>
+     * </ul>
+     */
     private void setupClickListeners() {
         cardArm.setOnClickListener(v -> {
             Navigation.findNavController(requireView())
@@ -102,6 +175,10 @@ public class HomeFragment extends Fragment {
         cardCheckStatus.setOnClickListener(v -> viewModel.checkStatus());
     }
 
+    /**
+     * Configura gli observer sui LiveData del ViewModel.
+     * Osserva: stato allarme, ultimo controllo, stato caricamento, messaggi di errore.
+     */
     private void observeData() {
         viewModel.getAlarmStatus().observe(getViewLifecycleOwner(), this::updateStatusUI);
 
@@ -130,6 +207,12 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Aggiorna l'interfaccia utente in base allo stato dell'allarme.
+     * Imposta icona, colore e testo appropriati per ogni stato.
+     *
+     * @param status lo stato corrente dell'allarme (ARMED, DISARMED, ALARM, TAMPER, UNKNOWN)
+     */
     private void updateStatusUI(String status) {
         if (status == null) {
             status = Constants.STATUS_UNKNOWN;
@@ -173,6 +256,10 @@ public class HomeFragment extends Fragment {
         textStatus.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
     }
 
+    /**
+     * Mostra un dialog di conferma prima di disattivare l'allarme.
+     * Se l'utente conferma, viene richiesta la disattivazione al ViewModel.
+     */
     private void showDisarmConfirmation() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.dialog_disarm_title)

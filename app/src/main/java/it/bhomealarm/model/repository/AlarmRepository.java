@@ -109,37 +109,94 @@ public class AlarmRepository {
 
     // ========== Scenario ==========
 
+    /**
+     * Recupera tutti gli scenari (predefiniti e personalizzati).
+     *
+     * @return LiveData con la lista di tutti gli scenari
+     */
     public LiveData<List<Scenario>> getAllScenarios() {
         return scenarioDao.getAllScenarios();
     }
 
+    /**
+     * Recupera uno scenario per numero slot.
+     *
+     * @param slot Numero slot (1-16 predefiniti, >100 custom)
+     * @return LiveData con lo scenario
+     */
     public LiveData<Scenario> getScenarioBySlot(int slot) {
         return scenarioDao.getScenarioBySlot(slot);
     }
 
+    /**
+     * Inserisce o aggiorna uno scenario.
+     * Operazione eseguita in background.
+     *
+     * @param scenario Lo scenario da salvare
+     */
     public void insertScenario(Scenario scenario) {
         executorService.execute(() -> scenarioDao.insert(scenario));
     }
 
+    /**
+     * Inserisce una lista di scenari.
+     * Usato durante il parsing delle risposte CONF2/CONF3.
+     *
+     * @param scenarios Lista degli scenari da inserire
+     */
     public void insertAllScenarios(List<Scenario> scenarios) {
         executorService.execute(() -> scenarioDao.insertAll(scenarios));
     }
 
+    /**
+     * Aggiorna uno scenario esistente.
+     *
+     * @param scenario Lo scenario con i dati aggiornati
+     */
     public void updateScenario(Scenario scenario) {
         executorService.execute(() -> scenarioDao.update(scenario));
     }
 
+    /**
+     * Elimina tutti gli scenari dal database.
+     * Usato durante il reset della configurazione.
+     */
     public void deleteAllScenarios() {
         executorService.execute(scenarioDao::deleteAll);
     }
 
+    /**
+     * Recupera solo gli scenari personalizzati (creati dall'utente).
+     *
+     * @return LiveData con gli scenari custom
+     */
     public LiveData<List<Scenario>> getCustomScenarios() {
         return scenarioDao.getCustomScenarios();
     }
 
+    /**
+     * Salva un nuovo scenario personalizzato nel database.
+     * <p>
+     * Lo scenario viene creato con:
+     * <ul>
+     *     <li>Slot automatico > 100 (prossimo disponibile)</li>
+     *     <li>Flag isCustom = true</li>
+     *     <li>Enabled = true di default</li>
+     * </ul>
+     * <p>
+     * L'operazione è asincrona. Il callback viene invocato al termine
+     * del salvataggio con lo scenario creato.
+     *
+     * @param name Nome dello scenario scelto dall'utente
+     * @param zoneMask Bitmask delle zone da includere (es. 13 = zone 1,3,4)
+     * @param callback Callback invocato al completamento del salvataggio
+     */
     public void saveCustomScenario(String name, int zoneMask, OnScenarioSavedCallback callback) {
         executorService.execute(() -> {
+            // Calcola il prossimo slot disponibile per scenari custom
             int slot = scenarioDao.getNextCustomSlot();
+
+            // Crea il nuovo scenario
             Scenario scenario = new Scenario();
             scenario.setSlot(slot);
             scenario.setName(name);
@@ -147,18 +204,39 @@ public class AlarmRepository {
             scenario.setEnabled(true);
             scenario.setCustom(true);
             scenario.setUpdatedAt(System.currentTimeMillis());
+
+            // Salva nel database
             scenarioDao.insert(scenario);
+
+            // Notifica il completamento
             if (callback != null) {
                 callback.onSaved(scenario);
             }
         });
     }
 
+    /**
+     * Elimina uno scenario dal database.
+     * Funziona sia per scenari predefiniti che personalizzati.
+     * <p>
+     * Nota: gli scenari predefiniti eliminati possono essere ripristinati
+     * eseguendo nuovamente la configurazione CONF2/CONF3.
+     *
+     * @param slot Numero slot dello scenario da eliminare
+     */
     public void deleteCustomScenario(int slot) {
         executorService.execute(() -> scenarioDao.deleteBySlot(slot));
     }
 
+    /**
+     * Interfaccia callback per il salvataggio di scenari personalizzati.
+     */
     public interface OnScenarioSavedCallback {
+        /**
+         * Chiamato quando lo scenario è stato salvato con successo.
+         *
+         * @param scenario Lo scenario appena creato
+         */
         void onSaved(Scenario scenario);
     }
 

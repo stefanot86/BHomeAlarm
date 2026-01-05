@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout della schermata Splash dell'applicazione BHomeAlarm.
+    Questa schermata viene mostrata all'avvio dell'app mentre vengono
+    caricate le configurazioni iniziali e verificati i requisiti.
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
+    <!-- ========================================== -->
+    <!-- SEZIONE LOGO E BRANDING                    -->
+    <!-- ========================================== -->
+
+    <!-- Icona principale dell'applicazione (scudo) -->
     <ImageView
         android:id="@+id/icon_app"
         android:layout_width="120dp"
@@ -18,6 +28,7 @@
         app:layout_constraintVertical_chainStyle="packed"
         app:tint="?attr/colorPrimary" />
 
+    <!-- Nome dell'applicazione -->
     <TextView
         android:id="@+id/text_app_name"
         android:layout_width="wrap_content"
@@ -31,6 +42,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icon_app" />
 
+    <!-- Versione dell'applicazione -->
     <TextView
         android:id="@+id/text_version"
         android:layout_width="wrap_content"
@@ -45,6 +57,10 @@
         tools:text="Versione 1.0.0"
         xmlns:tools="http://schemas.android.com/tools" />
 
+    <!-- ========================================== -->
+    <!-- INDICATORE DI CARICAMENTO                  -->
+    <!-- Spinner circolare durante l'inizializzazione -->
+    <!-- ========================================== -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_loading"
         android:layout_width="wrap_content"

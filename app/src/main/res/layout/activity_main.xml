@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout principale dell'applicazione BHomeAlarm.
+    Questo layout funge da contenitore principale per la navigazione dell'app,
+    utilizzando un CoordinatorLayout per gestire il comportamento dei fragment
+    e la barra di navigazione inferiore.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Contenitore per i fragment di navigazione -->
+    <!-- Utilizza il NavHostFragment per la gestione della navigazione tra le schermate -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -14,6 +22,8 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
+    <!-- Barra di navigazione inferiore -->
+    <!-- Permette la navigazione rapida tra le sezioni principali dell'app -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

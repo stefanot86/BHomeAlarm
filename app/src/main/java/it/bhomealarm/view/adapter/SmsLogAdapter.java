@@ -17,11 +17,48 @@ import it.bhomealarm.R;
 import it.bhomealarm.model.entity.SmsLog;
 
 /**
- * Adapter per la lista log SMS.
+ * Adapter per la visualizzazione dello storico dei messaggi SMS scambiati con la centrale.
+ * <p>
+ * Questo adapter gestisce una lista di {@link SmsLog} mostrando per ciascun messaggio
+ * la direzione (inviato/ricevuto), il contenuto, il timestamp relativo e lo stato.
+ * Utilizza il layout {@code item_log.xml} che presenta:
+ * <ul>
+ *     <li>Icona direzione: freccia verso l'alto (inviato) o verso il basso (ricevuto)</li>
+ *     <li>Contenuto del messaggio SMS</li>
+ *     <li>Timestamp in formato relativo (es. "5 min fa")</li>
+ *     <li>Icona stato: successo (spunta), in attesa (orologio) o errore (X)</li>
+ * </ul>
+ * </p>
+ * <p>
+ * I colori delle icone variano in base allo stato:
+ * <ul>
+ *     <li><b>Inviato</b>: colore primario</li>
+ *     <li><b>Ricevuto</b>: colore secondario</li>
+ *     <li><b>Successo</b>: colore primario</li>
+ *     <li><b>In attesa</b>: colore neutro</li>
+ *     <li><b>Errore</b>: colore errore</li>
+ * </ul>
+ * </p>
+ *
+ * @see SmsLog
+ * @see OnLogClickListener
  */
 public class SmsLogAdapter extends ListAdapter<SmsLog, SmsLogAdapter.SmsLogViewHolder> {
 
+    /**
+     * Interfaccia listener per gestire gli eventi di click sui log SMS.
+     * <p>
+     * Implementare questa interfaccia per ricevere notifiche quando l'utente
+     * tocca un elemento della lista, tipicamente per mostrare i dettagli completi
+     * del messaggio SMS in un dialog o schermata dedicata.
+     * </p>
+     */
     public interface OnLogClickListener {
+        /**
+         * Chiamato quando un log SMS viene selezionato dalla lista.
+         *
+         * @param log il log SMS su cui e' stato effettuato il click
+         */
         void onLogClick(SmsLog log);
     }
 
@@ -62,12 +99,32 @@ public class SmsLogAdapter extends ListAdapter<SmsLog, SmsLogAdapter.SmsLogViewH
         holder.bind(getItem(position));
     }
 
+    /**
+     * ViewHolder per la visualizzazione di un singolo log SMS.
+     * <p>
+     * Mostra le informazioni complete del messaggio: direzione, contenuto,
+     * timestamp relativo e stato di invio/ricezione. Supporta il click
+     * per visualizzare i dettagli completi.
+     * </p>
+     */
     class SmsLogViewHolder extends RecyclerView.ViewHolder {
+        /** Icona per indicare la direzione del messaggio (inviato/ricevuto). */
         private final ImageView iconDirection;
+        /** TextView per visualizzare il contenuto del messaggio SMS. */
         private final TextView textLogContent;
+        /** TextView per visualizzare il timestamp in formato relativo. */
         private final TextView textLogTime;
+        /** Icona per indicare lo stato del messaggio (successo/pending/errore). */
         private final ImageView iconStatus;
 
+        /**
+         * Costruisce un nuovo ViewHolder per l'elemento log SMS.
+         * <p>
+         * Configura il click listener per notificare la selezione del log.
+         * </p>
+         *
+         * @param itemView la vista radice dell'elemento
+         */
         SmsLogViewHolder(@NonNull View itemView) {
             super(itemView);
             iconDirection = itemView.findViewById(R.id.icon_direction);
@@ -83,6 +140,21 @@ public class SmsLogAdapter extends ListAdapter<SmsLog, SmsLogAdapter.SmsLogViewH
             });
         }
 
+        /**
+         * Associa i dati di un log SMS a questa vista.
+         * <p>
+         * Visualizza il contenuto del messaggio, il timestamp in formato relativo
+         * (es. "5 min fa") e aggiorna le icone di direzione e stato:
+         * <ul>
+         *     <li><b>Direzione</b>: freccia su (blu) per inviati, freccia giu' (grigio) per ricevuti</li>
+         *     <li><b>Stato successo</b>: icona spunta verde</li>
+         *     <li><b>Stato pending</b>: icona orologio grigia</li>
+         *     <li><b>Stato errore</b>: icona X rossa</li>
+         * </ul>
+         * </p>
+         *
+         * @param log il log SMS da visualizzare
+         */
         void bind(SmsLog log) {
             textLogContent.setText(log.getMessage());
 

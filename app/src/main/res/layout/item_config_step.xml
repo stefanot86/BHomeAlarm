@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Layout per un singolo step di configurazione nella lista.
+    Mostra lo stato dello step (in attesa, in corso, completato, errore)
+    con icona, nome e stato testuale.
+-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,6 +14,8 @@
     android:orientation="horizontal"
     android:paddingVertical="12dp">
 
+    <!-- Icona stato dello step -->
+    <!-- Cambia in base allo stato: pending, check_circle, error, ecc. -->
     <ImageView
         android:id="@+id/icon_status"
         android:layout_width="24dp"
@@ -17,6 +24,7 @@
         app:tint="?attr/colorOnSurfaceVariant"
         tools:src="@drawable/ic_check_circle" />
 
+    <!-- Sezione informazioni step -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -24,6 +32,7 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <!-- Nome dello step (es. CONF1, CONF2, ecc.) -->
         <TextView
             android:id="@+id/text_step_name"
             android:layout_width="wrap_content"
@@ -31,6 +40,7 @@
             android:textAppearance="?attr/textAppearanceBodyLarge"
             tools:text="CONF1 - Configurazione base" />
 
+        <!-- Stato testuale dello step (opzionale) -->
         <TextView
             android:id="@+id/text_step_status"
             android:layout_width="wrap_content"
@@ -42,6 +52,8 @@
 
     </LinearLayout>
 
+    <!-- Indicatore di caricamento circolare -->
+    <!-- Mostrato quando lo step e' in esecuzione -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_step"
         android:layout_width="20dp"

@@ -43,11 +43,24 @@ L'app recupera la configurazione completa dell'allarme tramite 5 messaggi:
 
 ### 4. Gestione Scenari
 
-- **16 scenari** predefiniti
+- **16 scenari** predefiniti (scaricati dall'allarme con CONF2/CONF3)
+- **Scenari custom** salvati localmente
 - Ogni scenario ha:
-  - Nome (ricevuto da CONF2/CONF3)
+  - Nome
   - Maschera zone associate
-- Possibilità di creare scenario "Custom" selezionando zone manualmente
+  - Flag custom (per distinguere predefiniti da custom)
+
+#### Creazione Scenario Custom
+1. Click su "Crea scenario" nella lista scenari
+2. Inserire nome scenario
+3. Selezionare le zone da includere
+4. Click "Salva"
+5. Dialog "Vuoi armare ora?" permette attivazione immediata
+
+#### Eliminazione Scenari
+- **Long press** su qualsiasi scenario mostra dialog di conferma eliminazione
+- Sia scenari predefiniti che custom possono essere eliminati
+- Gli scenari predefiniti possono essere riottenuti con nuova configurazione CONF2/CONF3
 
 ### 5. Gestione Utenti (Rubrica)
 
@@ -182,7 +195,7 @@ Lingue supportate:
 
 **Comandi SMS**:
 - Scenario predefinito: `SCE:XX` (XX = numero scenario)
-- Scenario custom: `CUST:ZZZZZZZZ` (Z = 0/1 per ogni zona)
+- Scenario custom: `CUST:NNN` (N = numeri zone attive, es. `CUST:134` per zone 1,3,4)
 
 **Postcondizioni**: Allarme attivato, log salvato
 

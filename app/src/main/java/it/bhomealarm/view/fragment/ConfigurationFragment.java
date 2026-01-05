@@ -26,30 +26,80 @@ import it.bhomealarm.controller.viewmodel.ConfigurationViewModel;
 import it.bhomealarm.view.adapter.ConfigStepsAdapter;
 
 /**
- * Fragment per la configurazione iniziale tramite SMS.
+ * Fragment per la configurazione iniziale della centralina allarme tramite SMS.
+ * <p>
+ * Questo fragment guida l'utente attraverso il processo di configurazione iniziale,
+ * inviando una serie di comandi SMS alla centralina per impostare i parametri di base.
+ * <p>
+ * Il flusso di configurazione prevede:
+ * <ol>
+ *     <li>L'utente avvia la configurazione toccando il pulsante START</li>
+ *     <li>Il sistema invia una serie di SMS di configurazione</li>
+ *     <li>Ogni step viene mostrato nella lista con il suo stato</li>
+ *     <li>Il progresso viene visualizzato con barra e percentuale</li>
+ *     <li>Al termine viene mostrato un messaggio di completamento</li>
+ * </ol>
+ * <p>
+ * L'utente puo' annullare la configurazione in qualsiasi momento con conferma.
+ * In caso di errore, viene offerta la possibilita' di riprovare.
+ *
+ * @see ConfigurationViewModel ViewModel che gestisce il processo di configurazione
+ * @see ConfigStepsAdapter Adapter per la visualizzazione degli step di configurazione
  */
 public class ConfigurationFragment extends Fragment {
 
+    /** ViewModel per la gestione del processo di configurazione */
     private ConfigurationViewModel viewModel;
+
+    /** Adapter per la lista degli step di configurazione */
     private ConfigStepsAdapter adapter;
 
-    // Views
+    /** Toolbar con pulsante di navigazione indietro */
     private MaterialToolbar toolbar;
+
+    /** Barra di progresso della configurazione */
     private LinearProgressIndicator progressBar;
+
+    /** Testo che mostra la percentuale di completamento */
     private TextView textProgressPercent;
+
+    /** Testo che mostra lo stato corrente della configurazione */
     private TextView textStatus;
+
+    /** RecyclerView per visualizzare gli step di configurazione */
     private RecyclerView recyclerSteps;
+
+    /** Card che contiene il log di debug */
     private MaterialCardView cardDebug;
+
+    /** Testo che mostra il log di debug degli SMS */
     private TextView textDebugLog;
+
+    /** Pulsante per annullare/chiudere la configurazione */
     private MaterialButton buttonCancel;
+
+    /** Pulsante per avviare la configurazione */
     private MaterialButton buttonStart;
 
+    /**
+     * Inizializza il ViewModel all'avvio del Fragment.
+     *
+     * @param savedInstanceState stato salvato dell'istanza precedente, puo' essere null
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ConfigurationViewModel.class);
     }
 
+    /**
+     * Crea e restituisce la view hierarchy associata al fragment.
+     *
+     * @param inflater inflater per creare la view dal layout XML
+     * @param container contenitore padre della view
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     * @return la view root del fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -57,6 +107,13 @@ public class ConfigurationFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_configuration, container, false);
     }
 
+    /**
+     * Chiamato dopo che la view e' stata creata.
+     * Inizializza le views, la RecyclerView, i listener e avvia l'osservazione dei dati.
+     *
+     * @param view la view root del fragment
+     * @param savedInstanceState stato salvato dell'istanza precedente
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -66,6 +123,12 @@ public class ConfigurationFragment extends Fragment {
         observeData();
     }
 
+    /**
+     * Inizializza i riferimenti alle views del layout.
+     * Configura la toolbar con gestione della navigazione indietro durante la configurazione.
+     *
+     * @param view la view root del fragment
+     */
     private void setupViews(View view) {
         toolbar = view.findViewById(R.id.toolbar);
         progressBar = view.findViewById(R.id.progress_bar);
@@ -86,11 +149,18 @@ public class ConfigurationFragment extends Fragment {
         });
     }
 
+    /**
+     * Configura la RecyclerView con l'adapter per gli step di configurazione.
+     */
     private void setupRecyclerView() {
         adapter = new ConfigStepsAdapter();
         recyclerSteps.setAdapter(adapter);
     }
 
+    /**
+     * Configura i listener per i pulsanti Start e Cancel.
+     * Gestisce la richiesta di conferma se la configurazione e' in corso.
+     */
     private void setupClickListeners() {
         buttonStart.setOnClickListener(v -> viewModel.startConfiguration());
 
@@ -103,6 +173,10 @@ public class ConfigurationFragment extends Fragment {
         });
     }
 
+    /**
+     * Configura gli observer sui LiveData del ViewModel.
+     * Osserva: progresso, messaggio stato, step, stato esecuzione, completamento, errori, log debug.
+     */
     private void observeData() {
         viewModel.getProgress().observe(getViewLifecycleOwner(), progress -> {
             if (progress != null) {
@@ -157,6 +231,10 @@ public class ConfigurationFragment extends Fragment {
         });
     }
 
+    /**
+     * Mostra un dialog di conferma per annullare la configurazione in corso.
+     * Se l'utente conferma, la configurazione viene annullata e si torna indietro.
+     */
     private void showCancelConfirmation() {
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.dialog_cancel_config_title)

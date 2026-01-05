@@ -6,27 +6,47 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 /**
- * Rappresenta una zona del sistema allarme (max 8 zone).
+ * Entità Room che rappresenta una zona del sistema allarme.
+ * <p>
+ * Il sistema Bticino supporta fino a 8 zone, ognuna identificata da uno slot (1-8).
+ * Le zone vengono configurate fisicamente sull'allarme e i loro nomi vengono
+ * scaricati tramite la risposta CONF1.
+ * <p>
+ * Esempi di zone tipiche:
+ * <ul>
+ *     <li>Zona 1: Ingresso</li>
+ *     <li>Zona 2: Soggiorno</li>
+ *     <li>Zona 3: Camera da letto</li>
+ *     <li>Zona 4: Garage</li>
+ * </ul>
+ *
+ * @see it.bhomealarm.model.dao.ZoneDao
  */
 @Entity(tableName = "zones")
 public class Zone {
 
+    /** ID univoco nel database (auto-generato) */
     @PrimaryKey(autoGenerate = true)
     private long id;
 
+    /** Numero slot della zona (1-8) */
     @ColumnInfo(name = "slot")
-    private int slot; // 1-8
+    private int slot;
 
+    /** Nome della zona (es. "Ingresso", "Soggiorno") */
     @ColumnInfo(name = "name")
     @NonNull
     private String name = "";
 
+    /** True se la zona è abilitata/configurata */
     @ColumnInfo(name = "enabled")
     private boolean enabled;
 
+    /** Descrizione aggiuntiva della zona (opzionale) */
     @ColumnInfo(name = "description")
     private String description;
 
+    /** Timestamp dell'ultimo aggiornamento */
     @ColumnInfo(name = "updated_at")
     private long updatedAt;
 
