@@ -47,4 +47,13 @@ public interface ScenarioDao {
 
     @Query("UPDATE scenarios SET name = :name, zone_mask = :zoneMask, enabled = :enabled, updated_at = :timestamp WHERE slot = :slot")
     void updateScenario(int slot, String name, int zoneMask, boolean enabled, long timestamp);
+
+    @Query("SELECT * FROM scenarios WHERE is_custom = 1 ORDER BY slot ASC")
+    LiveData<List<Scenario>> getCustomScenarios();
+
+    @Query("SELECT COALESCE(MAX(slot), 100) + 1 FROM scenarios WHERE slot > 100")
+    int getNextCustomSlot();
+
+    @Query("DELETE FROM scenarios WHERE slot = :slot")
+    void deleteBySlot(int slot);
 }

@@ -25,7 +25,12 @@ public class ScenariosAdapter extends ListAdapter<Scenario, ScenariosAdapter.Sce
         void onScenarioClick(Scenario scenario);
     }
 
+    public interface OnScenarioLongClickListener {
+        void onScenarioLongClick(Scenario scenario);
+    }
+
     private OnScenarioClickListener listener;
+    private OnScenarioLongClickListener longClickListener;
 
     private static final DiffUtil.ItemCallback<Scenario> DIFF_CALLBACK = new DiffUtil.ItemCallback<Scenario>() {
         @Override
@@ -47,6 +52,10 @@ public class ScenariosAdapter extends ListAdapter<Scenario, ScenariosAdapter.Sce
 
     public void setOnScenarioClickListener(OnScenarioClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnScenarioLongClickListener(OnScenarioLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     @NonNull
@@ -78,6 +87,15 @@ public class ScenariosAdapter extends ListAdapter<Scenario, ScenariosAdapter.Sce
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onScenarioClick(getItem(position));
                 }
+            });
+
+            itemView.setOnLongClickListener(v -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && longClickListener != null) {
+                    longClickListener.onScenarioLongClick(getItem(position));
+                    return true;
+                }
+                return false;
             });
         }
 

@@ -30,8 +30,10 @@ public class ZonesViewModel extends AndroidViewModel {
     private final MutableLiveData<Set<Integer>> selectedZones = new MutableLiveData<>(new HashSet<>());
 
     // UI State
-    private final MutableLiveData<String> zoneMask = new MutableLiveData<>("00000000");
+    private final MutableLiveData<String> zoneNumbers = new MutableLiveData<>("");
     private final MutableLiveData<Integer> selectedCount = new MutableLiveData<>(0);
+    private final MutableLiveData<String> scenarioName = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> isSaving = new MutableLiveData<>(false);
 
     public ZonesViewModel(@NonNull Application application) {
         super(application);
@@ -49,12 +51,24 @@ public class ZonesViewModel extends AndroidViewModel {
         return selectedZones;
     }
 
-    public LiveData<String> getZoneMask() {
-        return zoneMask;
+    public LiveData<String> getZoneNumbers() {
+        return zoneNumbers;
     }
 
     public LiveData<Integer> getSelectedCount() {
         return selectedCount;
+    }
+
+    public LiveData<String> getScenarioName() {
+        return scenarioName;
+    }
+
+    public LiveData<Boolean> getIsSaving() {
+        return isSaving;
+    }
+
+    public void setScenarioName(String name) {
+        scenarioName.setValue(name);
     }
 
     // ========== Actions ==========
@@ -150,13 +164,13 @@ public class ZonesViewModel extends AndroidViewModel {
     }
 
     /**
-     * Restituisce la maschera per il comando CUST.
+     * Restituisce i numeri delle zone per il comando CUST.
      *
-     * @return Stringa di 8 caratteri (0/1)
+     * @return Stringa con i numeri delle zone selezionate (es. "134" per zone 1,3,4)
      */
-    public String getZoneMaskString() {
-        String mask = zoneMask.getValue();
-        return mask != null ? mask : "00000000";
+    public String getZoneNumbersString() {
+        String numbers = zoneNumbers.getValue();
+        return numbers != null ? numbers : "";
     }
 
     /**
@@ -169,13 +183,62 @@ public class ZonesViewModel extends AndroidViewModel {
         return count != null && count > 0;
     }
 
-    private void updateMask(Set<Integer> selected) {
-        StringBuilder mask = new StringBuilder();
-        for (int i = 1; i <= Constants.ZONE_COUNT; i++) {
-            mask.append(selected.contains(i) ? '1' : '0');
+    /**
+     * Restituisce la maschera zone come bitmask intero.
+     *
+     * @return Bitmask dove bit 0 = zona 1, bit 7 = zona 8
+     */
+    public int getZoneMaskInt() {
+        Set<Integer> selected = selectedZones.getValue();
+        if (selected == null || selected.isEmpty()) {
+            return 0;
+        }
+        int mask = 0;
+        for (int zone : selected) {
+            mask |= (1 << (zone - 1));
+        }
+        return mask;
+    }
+
+    /**
+     * Salva lo scenario personalizzato nel database.
+     *
+     * @param callback Callback chiamata quando lo scenario è salvato
+     */
+    public void saveCustomScenario(OnScenarioSavedListener callback) {
+        String name = scenarioName.getValue();
+        if (name == null || name.trim().isEmpty()) {
+            return;
+        }
+        if (!hasSelection()) {
+            return;
         }
 
-        zoneMask.setValue(mask.toString());
+        isSaving.setValue(true);
+        int zoneMask = getZoneMaskInt();
+
+        repository.saveCustomScenario(name.trim(), zoneMask, scenario -> {
+            isSaving.postValue(false);
+            if (callback != null) {
+                callback.onSaved(scenario);
+            }
+        });
+    }
+
+    public interface OnScenarioSavedListener {
+        void onSaved(it.bhomealarm.model.entity.Scenario scenario);
+    }
+
+    private void updateMask(Set<Integer> selected) {
+        // Genera stringa con i numeri delle zone ordinate (es. "134" per zone 1,3,4)
+        StringBuilder numbers = new StringBuilder();
+        for (int i = 1; i <= Constants.ZONE_COUNT; i++) {
+            if (selected.contains(i)) {
+                numbers.append(i);
+            }
+        }
+
+        zoneNumbers.setValue(numbers.toString());
         selectedCount.setValue(selected.size());
     }
 }

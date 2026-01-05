@@ -90,4 +90,15 @@ public class ScenariosViewModel extends AndroidViewModel {
         }
         return count;
     }
+
+    /**
+     * Elimina uno scenario.
+     *
+     * @param scenario Scenario da eliminare
+     */
+    public void deleteScenario(Scenario scenario) {
+        if (scenario != null) {
+            repository.deleteCustomScenario(scenario.getSlot());
+        }
+    }
 }

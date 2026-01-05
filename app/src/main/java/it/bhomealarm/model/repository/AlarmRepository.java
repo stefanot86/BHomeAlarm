@@ -133,6 +133,35 @@ public class AlarmRepository {
         executorService.execute(scenarioDao::deleteAll);
     }
 
+    public LiveData<List<Scenario>> getCustomScenarios() {
+        return scenarioDao.getCustomScenarios();
+    }
+
+    public void saveCustomScenario(String name, int zoneMask, OnScenarioSavedCallback callback) {
+        executorService.execute(() -> {
+            int slot = scenarioDao.getNextCustomSlot();
+            Scenario scenario = new Scenario();
+            scenario.setSlot(slot);
+            scenario.setName(name);
+            scenario.setZoneMask(zoneMask);
+            scenario.setEnabled(true);
+            scenario.setCustom(true);
+            scenario.setUpdatedAt(System.currentTimeMillis());
+            scenarioDao.insert(scenario);
+            if (callback != null) {
+                callback.onSaved(scenario);
+            }
+        });
+    }
+
+    public void deleteCustomScenario(int slot) {
+        executorService.execute(() -> scenarioDao.deleteBySlot(slot));
+    }
+
+    public interface OnScenarioSavedCallback {
+        void onSaved(Scenario scenario);
+    }
+
     // ========== User ==========
 
     public LiveData<List<User>> getAllUsers() {

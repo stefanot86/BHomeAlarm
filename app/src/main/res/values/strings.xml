@@ -43,6 +43,7 @@
     <string name="action_close">Chiudi</string>
     <string name="action_retry">Riprova</string>
     <string name="action_clear">Cancella</string>
+    <string name="action_delete">Elimina</string>
 
     <!-- Settings Sections -->
     <string name="section_configuration">Configurazione</string>
@@ -68,7 +69,7 @@
     <string name="sim_slot_1">SIM 1</string>
     <string name="sim_slot_2">SIM 2</string>
     <string name="hint_phone_number">Es. +39123456789</string>
-    <string name="info_message">BHomeAlarm v%s\n\nApplicazione per il controllo di sistemi di allarme BentelAlarm via SMS.\n\nSviluppato per uso personale.</string>
+    <string name="info_message">BHomeAlarm v%s\n\nApplicazione per il controllo di sistemi di allarme Bticino via SMS.\n\nSviluppato per uso personale.</string>
     <string name="last_check_format">Ultimo controllo: %s</string>
 
     <!-- Configuration -->
@@ -100,6 +101,16 @@
     <string name="zone_name">Zona %d - %s</string>
     <string name="zones_selected">%d zone selezionate</string>
     <string name="zones_none_selected">Nessuna zona selezionata</string>
+    <string name="hint_scenario_name">Nome scenario</string>
+    <string name="error_scenario_name_required">Inserisci un nome per lo scenario</string>
+    <string name="error_zones_required">Seleziona almeno una zona</string>
+    <string name="scenario_saved">Scenario salvato</string>
+    <string name="dialog_arm_after_save_title">Armare ora?</string>
+    <string name="dialog_arm_after_save_message">Lo scenario \"%s\" è stato salvato. Vuoi attivare l\'allarme adesso?</string>
+    <string name="title_create_scenario">Crea Scenario</string>
+    <string name="dialog_delete_scenario_title">Elimina Scenario</string>
+    <string name="dialog_delete_scenario_message">Eliminare lo scenario \"%s\"?</string>
+    <string name="scenario_deleted">Scenario eliminato</string>
 
     <!-- Log -->
     <string name="log_empty">Nessun messaggio</string>

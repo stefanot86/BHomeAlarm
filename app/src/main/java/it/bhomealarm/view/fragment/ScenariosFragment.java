@@ -72,6 +72,7 @@ public class ScenariosFragment extends Fragment {
     private void setupRecyclerView() {
         adapter = new ScenariosAdapter();
         adapter.setOnScenarioClickListener(this::onScenarioSelected);
+        adapter.setOnScenarioLongClickListener(this::onScenarioLongPressed);
         recyclerScenarios.setAdapter(adapter);
     }
 
@@ -100,9 +101,40 @@ public class ScenariosFragment extends Fragment {
                 .setMessage(getString(R.string.dialog_arm_message, title))
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_arm, (dialog, which) -> {
-                    homeViewModel.armWithScenario(scenario.getSlot());
+                    if (scenario.isCustom()) {
+                        // Scenario custom: invia CUST: con i numeri delle zone
+                        String zoneNumbers = getZoneNumbersFromMask(scenario.getZoneMask());
+                        homeViewModel.armWithCustomZones(zoneNumbers);
+                    } else {
+                        // Scenario predefinito: invia SCE:
+                        homeViewModel.armWithScenario(scenario.getSlot());
+                    }
                     Navigation.findNavController(requireView())
                             .popBackStack(R.id.homeFragment, false);
+                })
+                .show();
+    }
+
+    /**
+     * Converte un bitmask zone in stringa numeri (es. mask 0b00001101 -> "134")
+     */
+    private String getZoneNumbersFromMask(int mask) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= 8; i++) {
+            if ((mask & (1 << (i - 1))) != 0) {
+                sb.append(i);
+            }
+        }
+        return sb.toString();
+    }
+
+    private void onScenarioLongPressed(Scenario scenario) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.dialog_delete_scenario_title)
+                .setMessage(getString(R.string.dialog_delete_scenario_message, scenario.getName()))
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_delete, (dialog, which) -> {
+                    viewModel.deleteScenario(scenario);
                 })
                 .show();
     }

@@ -140,9 +140,9 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
     /**
      * Richiede attivazione allarme con zone personalizzate.
      *
-     * @param zoneMask Maschera zone (8 caratteri 0/1)
+     * @param zoneNumbers Numeri delle zone da attivare (es. "134" per zone 1,3,4)
      */
-    public void armWithCustomZones(String zoneMask) {
+    public void armWithCustomZones(String zoneNumbers) {
         String phone = getAlarmPhoneNumber();
         if (phone == null) {
             errorMessage.setValue("Numero allarme non configurato");
@@ -152,7 +152,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        String command = String.format(Constants.CMD_ARM_CUSTOM, zoneMask);
+        String command = String.format(Constants.CMD_ARM_CUSTOM, zoneNumbers);
         pendingMessageId = smsService.sendCommand(phone, command);
 
         if (pendingMessageId != null) {
