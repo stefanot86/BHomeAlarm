@@ -286,7 +286,7 @@ L'app utilizza Material Design 3 (Material You) con:
 │  INFO                      │
 │  ┌──────────────────────┐  │
 │  │ ℹ️ Informazioni       │  │
-│  │    Versione 1.0.0   >│  │
+│  │    Versione 1.0.1   >│  │
 │  └──────────────────────┘  │
 │                            │
 └────────────────────────────┘
