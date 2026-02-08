@@ -54,7 +54,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_app_name"
-        tools:text="Versione 1.0.0"
+        tools:text="Versione 1.0.1"
         xmlns:tools="http://schemas.android.com/tools" />
 
     <!-- ========================================== -->

@@ -63,7 +63,7 @@
     <string name="not_configured">Non configurato</string>
     <string name="scenarios_count_default">16 scenari</string>
     <string name="sim_default">SIM predefinita</string>
-    <string name="version_default">Versione 1.0.0</string>
+    <string name="version_default">Versione 1.0.1</string>
     <string name="version_format">Versione %s</string>
     <string name="sim_slot_format">SIM %d</string>
     <string name="sim_slot_1">SIM 1</string>

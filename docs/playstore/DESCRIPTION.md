@@ -94,7 +94,7 @@ PEGI 3 / Tutti
 
 ## Changelog (Note di Rilascio)
 
-### Versione 1.0.0
+### Versione 1.0.1
 - Prima release pubblica
 - Controllo allarme (attiva/disattiva/verifica)
 - Gestione 16 scenari + scenario personalizzato
