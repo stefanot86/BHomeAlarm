@@ -88,6 +88,21 @@ L'app recupera la configurazione completa dell'allarme tramite 5 messaggi:
   - Preferenze utente
   - Flag sistema (disclaimer accettato, ecc.)
 
+### 8. Widget Home Screen
+
+**Descrizione**: Widget Android per attivare/disattivare l'allarme dalla home screen senza aprire l'app.
+
+#### Caratteristiche
+- Mostra lo **stato corrente** del sistema (ATTIVO/DISATTIVO/ALLARME) con colore dedicato e ora dell'ultimo aggiornamento.
+- Bottone **Attiva**: apre una mini-schermata translucida (`AlarmActionActivity`) con la lista degli scenari abilitati; al tocco invia `SCE:NN` (o `CUST:NNN` per scenari personalizzati).
+- Bottone **Disattiva**: apre un dialog di **conferma** e, se confermato, invia `SYS OFF`.
+- Lo stato visualizzato si aggiorna automaticamente quando arriva una risposta dalla centrale (`SmsReceiver` → `AlarmWidgetProvider.updateAllWidgets`).
+
+#### Note implementative
+- Realizzato con `RemoteViews` (widget classico, nessuna dipendenza aggiuntiva).
+- Widget e Activity delegano l'invio comandi a `AlarmController`: nessuna logica duplicata rispetto ai ViewModel.
+- Casi limite gestiti: numero allarme non configurato (avviso + apertura app), permesso `SEND_SMS` mancante (richiesto dall'Activity).
+
 ---
 
 ## Nuove Funzionalità
@@ -317,6 +332,7 @@ Lingue supportate:
 | Modifica permessi | Users, UserPermissions |
 | Scenario custom | Scenarios, Zones |
 | Notifiche | (Background) |
+| Widget arm/disarm | Widget home screen, AlarmActionActivity |
 
 ---
 
@@ -343,8 +359,8 @@ Lingue supportate:
 - [x] Localizzazione (Italiano)
 - [x] Gestione errori avanzata
 
-### Fase 4 - Extra (Future)
-- [ ] Widget home screen
+### Fase 4 - Extra
+- [x] Widget home screen (attiva con scelta scenario / disattiva con conferma)
 - [ ] Backup cloud
 - [ ] Statistiche utilizzo
 - [ ] Temi personalizzati

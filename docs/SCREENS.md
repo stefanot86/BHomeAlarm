@@ -524,6 +524,56 @@ L'app utilizza Material Design 3 (Material You) con:
 
 ---
 
+## Widget Home Screen
+
+### AlarmWidget (AlarmWidgetProvider)
+
+**Scopo**: Attivare/disattivare l'allarme dalla home screen senza aprire l'app.
+
+**Layout** (~4x2 celle):
+```
+┌────────────────────────────┐
+│ BHomeAlarm                 │ ← titolo
+│ DISATTIVO                  │ ← stato (colore: verde/rosso/arancione)
+│ Ultimo controllo: 10:30    │ ← ora ultimo aggiornamento
+│                            │
+│ ┌──────────┐  ┌──────────┐ │
+│ │ 🔒 Attiva│  │🔓 Disatt.│ │ ← due bottoni
+│ └──────────┘  └──────────┘ │
+└────────────────────────────┘
+```
+
+**Note tecniche**:
+- Costruito con `RemoteViews` (no `MaterialCardView`/`ConstraintLayout`/`RecyclerView`).
+- Sfondo arrotondato `@drawable/widget_background` (varianti chiaro/scuro via `values`/`values-night`).
+- Bottone Attiva su `colorPrimary`, Disattiva su `colorError`; icone `ic_lock` / `ic_lock_open`.
+- Ogni bottone è un `PendingIntent` verso `AlarmActionActivity` con extra `Constants.WIDGET_EXTRA_MODE`.
+- Lo stato si aggiorna quando la centrale risponde (`SmsReceiver` → `AlarmWidgetProvider.updateAllWidgets`).
+
+### AlarmActionActivity (mini-schermata translucida)
+
+**Scopo**: Mini-finestra mostrata sopra la home quando si tocca un bottone del widget.
+
+- **Modalità ARM**: `MaterialAlertDialog` con la lista degli scenari abilitati → al tocco invia il comando e chiude.
+- **Modalità DISARM**: `MaterialAlertDialog` di conferma → su conferma invia `SYS OFF` e chiude.
+- Tema `Theme.BHomeAlarm.Transparent` (finestra trasparente, dialog Material 3 sopra la home).
+- Delega l'invio ad `AlarmController`; gestisce numero non configurato e permesso `SEND_SMS` mancante.
+
+```
+       (home screen sullo sfondo)
+   ┌────────────────────────────┐
+   │     Attiva Allarme         │
+   ├────────────────────────────┤
+   │  Casa                      │
+   │  Notte                     │  ← lista scenari (MODE_ARM)
+   │  Fuori Casa                │
+   ├────────────────────────────┤
+   │                  [ ANNULLA]│
+   └────────────────────────────┘
+```
+
+---
+
 ## Dialogs
 
 ### SimSelectionDialog

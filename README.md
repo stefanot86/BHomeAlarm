@@ -10,6 +10,7 @@ App Android per la gestione della centrale antifurto Bticino 3500/3500N tramite 
 - **Utenti**: Rubrica con 16 utenti e permessi configurabili
 - **Dual-SIM**: Supporto dispositivi dual-SIM
 - **Notifiche**: Notifiche push per le risposte dell'allarme
+- **Widget Home Screen**: Attiva (con scelta dello scenario) e disattiva (con conferma) l'allarme direttamente dalla home, senza aprire l'app
 
 ## Requisiti
 
@@ -25,12 +26,17 @@ Il progetto segue il pattern **MVVM (Model-View-ViewModel)**:
 ```
 it.bhomealarm/
 ├── model/          # Entities Room, DAOs, Repository
-├── view/           # Activities, Fragments, Adapters
-├── controller/     # ViewModels
+├── view/           # Activities (incl. AlarmActionActivity), Fragments, Adapters
+├── controller/     # ViewModels + AlarmController (invio comandi, fonte unica)
 ├── service/        # SMS e Notification services
+├── widget/         # AlarmWidgetProvider (widget home screen)
 ├── util/           # Utilities e helpers
 └── callback/       # Interfaces
 ```
+
+Il widget e la sua mini-schermata (`AlarmActionActivity`) **non** inviano SMS direttamente:
+delegano a `controller/AlarmController`, lo stesso punto usato dai ViewModel. In questo modo la
+logica di invio comandi e lettura stato non è duplicata.
 
 ## Stack Tecnologico
 
@@ -81,3 +87,5 @@ Consulta la cartella `docs/` per la documentazione completa:
 - Icone vector drawable
 - Collegamento SMS completo nei ViewModel
 - State machine configurazione CONF1-5
+- AlarmController per l'invio comandi (riusato da ViewModel, widget e Activity)
+- Widget home screen (AlarmWidgetProvider) con mini-schermata di scelta scenario / conferma disattivazione

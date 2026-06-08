@@ -39,6 +39,25 @@
             </intent-filter>
         </activity>
 
+        <!-- Mini-schermata translucida lanciata dal widget per arm/disarm -->
+        <activity
+            android:name=".view.activity.AlarmActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/Theme.BHomeAlarm.Transparent" />
+
+        <!-- Widget home screen per attivazione/disattivazione allarme -->
+        <receiver
+            android:name=".widget.AlarmWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/alarm_widget_info" />
+        </receiver>
+
         <!-- SMS Receiver for incoming SMS -->
         <receiver
             android:name=".service.SmsReceiver"

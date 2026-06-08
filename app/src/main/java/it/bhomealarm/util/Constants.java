@@ -468,4 +468,23 @@ public final class Constants {
      * Codice richiesta per selezione contatto dalla rubrica.
      */
     public static final int REQUEST_CONTACT_PICKER = 102;
+
+    // ========== Widget ==========
+
+    /**
+     * Extra dell'Intent usato dal widget per indicare l'azione richiesta
+     * all'Activity {@code AlarmActionActivity} ({@link #WIDGET_MODE_ARM} o
+     * {@link #WIDGET_MODE_DISARM}).
+     */
+    public static final String WIDGET_EXTRA_MODE = "it.bhomealarm.widget.EXTRA_MODE";
+
+    /**
+     * Modalità widget: attivazione allarme (mostra la lista scenari).
+     */
+    public static final int WIDGET_MODE_ARM = 0;
+
+    /**
+     * Modalità widget: disattivazione allarme (mostra il dialog di conferma).
+     */
+    public static final int WIDGET_MODE_DISARM = 1;
 }

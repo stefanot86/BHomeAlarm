@@ -70,4 +70,9 @@
 
     <!-- Seed color -->
     <color name="seed">#006C4C</color>
+
+    <!-- Widget (variante chiara; vedi values-night/colors.xml per la scura) -->
+    <color name="widget_background">#FBFDF8</color>
+    <color name="widget_text_primary">#191C1A</color>
+    <color name="widget_text_secondary">#404943</color>
 </resources>

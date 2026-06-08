@@ -131,6 +131,9 @@ it.bhomealarm/
 │   ├── TimerService.java           # Timer periodico
 │   └── NotificationService.java    # Gestione notifiche push
 │
+├── widget/                         # Widget home screen
+│   └── AlarmWidgetProvider.java    # AppWidgetProvider (arm/disarm dalla home)
+│
 ├── util/                           # Utilities
 │   ├── Constants.java              # Costanti app
 │   ├── SmsParser.java              # Parser risposte SMS
@@ -144,6 +147,52 @@ it.bhomealarm/
     ├── OnNavigationListener.java
     └── OnUserActionListener.java
 ```
+
+---
+
+## Widget e AlarmController
+
+> Nota: il resto di questo documento descrive il disegno MVC originale. L'app è di fatto
+> implementata in **MVVM** (ViewModel in `controller/viewmodel/`). Con l'aggiunta del widget
+> home screen è stato introdotto un vero **`AlarmController`** nel layer controller.
+
+### AlarmController (`controller/AlarmController.java`)
+
+Controller singleton che è l'**unico punto** che conosce i comandi SMS dell'allarme e il
+numero della centrale. Si colloca sopra `SmsService` (invio fisico, Dual-SIM, logging) e sotto
+View/ViewModel. Espone:
+
+- `armWithScenario(int slot)`, `armWithCustomZones(String zones)`, `disarm()`, `checkStatus()`
+  → restituiscono il `messageId` (o `null`).
+- `getAlarmPhoneNumber()` / `isPhoneConfigured()`, `getLastStatus()`, `getLastCheckTime()`.
+
+Vi attingono `HomeViewModel`, `AlarmActionActivity` e `AlarmWidgetProvider`, evitando di
+duplicare la logica "leggi numero → formatta comando → invia SMS". Il controller **non**
+gestisce timeout/LiveData/toast: quelle restano al chiamante.
+
+### Widget (`widget/AlarmWidgetProvider.java`)
+
+`AppWidgetProvider` basato su `RemoteViews`. Mostra lo stato corrente (via `AlarmController`)
+e due bottoni i cui `PendingIntent` lanciano `view/activity/AlarmActionActivity` in modalità
+arm/disarm (`Constants.WIDGET_MODE_*`). `SmsReceiver` chiama `AlarmWidgetProvider.updateAllWidgets`
+per riflettere il nuovo stato quando arriva una risposta dalla centrale.
+
+### Flusso comando dal widget
+
+```
+Tap widget (Attiva/Disattiva)
+        │  PendingIntent
+        ▼
+AlarmActionActivity (mini-schermata translucida)
+        │  scelta scenario / conferma disarm
+        ▼
+AlarmController.armWithScenario() / disarm()
+        │
+        ▼
+SmsService.sendCommand()  ──►  SMS
+```
+
+Lo stesso `AlarmController` è invocato da `HomeViewModel` per le azioni in-app.
 
 ---
 

@@ -4,6 +4,8 @@
 
 L'applicazione comunica con il sistema di allarme domestico tramite SMS. Questo documento descrive il protocollo di comunicazione completo.
 
+> Nota: anche il widget home screen usa **gli stessi comandi** descritti qui (`SCE:NN`, `CUST:NNN`, `SYS OFF`). Il widget e la sua mini-schermata non implementano un protocollo proprio: passano da `AlarmController`, che riutilizza i comandi definiti in `util/Constants.java`.
+
 ---
 
 ## Formato Messaggi

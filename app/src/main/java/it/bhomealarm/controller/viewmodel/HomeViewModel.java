@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.List;
 
 import it.bhomealarm.callback.OnSmsResultListener;
+import it.bhomealarm.controller.AlarmController;
 import it.bhomealarm.model.entity.AlarmConfig;
 import it.bhomealarm.model.entity.Scenario;
 import it.bhomealarm.model.entity.SmsLog;
@@ -30,6 +31,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
 
     private final AlarmRepository repository;
     private final SmsService smsService;
+    private final AlarmController controller;
     private final SharedPreferences prefs;
     private final Handler timeoutHandler;
 
@@ -53,6 +55,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         super(application);
         repository = AlarmRepository.getInstance(application);
         smsService = SmsService.getInstance(application);
+        controller = AlarmController.getInstance(application);
         prefs = application.getSharedPreferences(Constants.PREF_NAME, 0);
         timeoutHandler = new Handler(Looper.getMainLooper());
 
@@ -117,8 +120,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
      * @param scenarioId ID scenario (1-16)
      */
     public void armWithScenario(int scenarioId) {
-        String phone = getAlarmPhoneNumber();
-        if (phone == null) {
+        if (!controller.isPhoneConfigured()) {
             errorMessage.setValue("Numero allarme non configurato");
             return;
         }
@@ -126,8 +128,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        String command = String.format(Constants.CMD_ARM_SCENARIO, scenarioId);
-        pendingMessageId = smsService.sendCommand(phone, command);
+        pendingMessageId = controller.armWithScenario(scenarioId);
 
         if (pendingMessageId != null) {
             startTimeout();
@@ -143,8 +144,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
      * @param zoneNumbers Numeri delle zone da attivare (es. "134" per zone 1,3,4)
      */
     public void armWithCustomZones(String zoneNumbers) {
-        String phone = getAlarmPhoneNumber();
-        if (phone == null) {
+        if (!controller.isPhoneConfigured()) {
             errorMessage.setValue("Numero allarme non configurato");
             return;
         }
@@ -152,8 +152,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        String command = String.format(Constants.CMD_ARM_CUSTOM, zoneNumbers);
-        pendingMessageId = smsService.sendCommand(phone, command);
+        pendingMessageId = controller.armWithCustomZones(zoneNumbers);
 
         if (pendingMessageId != null) {
             startTimeout();
@@ -167,8 +166,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
      * Richiede disattivazione allarme.
      */
     public void disarm() {
-        String phone = getAlarmPhoneNumber();
-        if (phone == null) {
+        if (!controller.isPhoneConfigured()) {
             errorMessage.setValue("Numero allarme non configurato");
             return;
         }
@@ -176,7 +174,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        pendingMessageId = smsService.sendCommand(phone, Constants.CMD_DISARM);
+        pendingMessageId = controller.disarm();
 
         if (pendingMessageId != null) {
             startTimeout();
@@ -190,8 +188,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
      * Richiede verifica stato sistema.
      */
     public void checkStatus() {
-        String phone = getAlarmPhoneNumber();
-        if (phone == null) {
+        if (!controller.isPhoneConfigured()) {
             errorMessage.setValue("Numero allarme non configurato");
             return;
         }
@@ -199,7 +196,7 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        pendingMessageId = smsService.sendCommand(phone, Constants.CMD_STATUS);
+        pendingMessageId = controller.checkStatus();
 
         if (pendingMessageId != null) {
             startTimeout();
@@ -295,11 +292,6 @@ public class HomeViewModel extends AndroidViewModel implements OnSmsResultListen
     }
 
     // ========== Private Helper Methods ==========
-
-    private String getAlarmPhoneNumber() {
-        String phone = prefs.getString(Constants.PREF_ALARM_PHONE, "");
-        return phone.isEmpty() ? null : phone;
-    }
 
     private void startTimeout() {
         cancelTimeout();

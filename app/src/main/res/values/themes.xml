@@ -46,4 +46,19 @@
         <!-- Divider -->
         <item name="dividerColor">@color/md_theme_light_outlineVariant</item>
     </style>
+
+    <!--
+        Tema translucido per AlarmActionActivity (mini-schermata del widget).
+        Eredita per nome da Theme.BHomeAlarm, quindi assume automaticamente la
+        variante chiara o scura in base alla configurazione di sistema; rende la
+        finestra trasparente così l'Activity mostra solo il dialog sopra la home.
+    -->
+    <style name="Theme.BHomeAlarm.Transparent" parent="Theme.BHomeAlarm">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

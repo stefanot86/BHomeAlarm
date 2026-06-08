@@ -17,6 +17,7 @@ import it.bhomealarm.model.repository.AlarmRepository;
 import it.bhomealarm.util.Constants;
 import it.bhomealarm.util.PhoneNumberUtils;
 import it.bhomealarm.util.SmsParser;
+import it.bhomealarm.widget.AlarmWidgetProvider;
 
 /**
  * BroadcastReceiver per la gestione degli SMS in arrivo e dei callback di invio/consegna.
@@ -215,6 +216,9 @@ public class SmsReceiver extends BroadcastReceiver {
                             .putLong(Constants.PREF_LAST_CHECK_TIME, System.currentTimeMillis())
                             .apply();
                     Log.d(TAG, "Stato salvato: " + data.status);
+
+                    // Aggiorna il widget home screen con il nuovo stato
+                    AlarmWidgetProvider.updateAllWidgets(context);
                 }
             }
         } catch (Exception e) {

@@ -173,6 +173,11 @@
     <string name="notification_channel_alarm">Allarme</string>
     <string name="notification_channel_sms">Stato SMS</string>
 
+    <!-- Widget -->
+    <string name="widget_description">Attiva o disattiva l\'allarme dalla home</string>
+    <string name="widget_arm">Attiva</string>
+    <string name="widget_sms_sent">Comando inviato</string>
+
     <!-- Content Descriptions -->
     <string name="cd_navigate_back">Torna indietro</string>
     <string name="cd_status_armed">Sistema attivo</string>

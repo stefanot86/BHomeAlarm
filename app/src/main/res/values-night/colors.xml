@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget (variante scura) -->
+    <color name="widget_background">#1A1C1A</color>
+    <color name="widget_text_primary">#E1E3DF</color>
+    <color name="widget_text_secondary">#C0C9C1</color>
+</resources>
