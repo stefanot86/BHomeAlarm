@@ -4,13 +4,16 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
@@ -104,8 +107,43 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        applyWindowInsets();
         setupNavigation();
         checkPermissions();
+    }
+
+    /**
+     * Applica i window insets ai contenuti per gestire l'edge-to-edge imposto da
+     * Android 15 (targetSdk 35).
+     * <p>
+     * Senza questa gestione il contenuto dei Fragment verrebbe disegnato sotto la
+     * status bar (apparendo "tagliato" in alto) e la {@link BottomNavigationView}
+     * finirebbe sotto la barra di navigazione di sistema. Vengono quindi aggiunti:
+     * </p>
+     * <ul>
+     *   <li>al NavHostFragment: padding superiore pari alla status bar e padding
+     *       laterali per eventuali notch/cutout;</li>
+     *   <li>alla BottomNavigationView: padding inferiore pari alla barra di
+     *       navigazione e padding laterali.</li>
+     * </ul>
+     */
+    private void applyWindowInsets() {
+        View navHost = findViewById(R.id.nav_host_fragment);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        ViewCompat.setOnApplyWindowInsetsListener(navHost, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(bars.left, bars.top, bars.right, v.getPaddingBottom());
+            return insets;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(bars.left, v.getPaddingTop(), bars.right, bars.bottom);
+            return insets;
+        });
     }
 
     /**

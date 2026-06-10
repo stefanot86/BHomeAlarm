@@ -51,6 +51,7 @@
             android:id="@+id/widget_btn_arm"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_arm_bg"
             android:clickable="true"
@@ -76,16 +77,12 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Spazio tra i bottoni -->
-        <View
-            android:layout_width="10dp"
-            android:layout_height="match_parent" />
-
         <!-- Disattiva -->
         <LinearLayout
             android:id="@+id/widget_btn_disarm"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_disarm_bg"
             android:clickable="true"
